@@ -18,7 +18,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const bucket = new s3.Bucket(this, 'CloudCinemaMoviesBucket', {
       bucketName: 'cloud-cinema-movies-bucket', 
       versioned: true, 
-      removalPolicy: cdk.RemovalPolicy.DESTROY
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true
     });
 
