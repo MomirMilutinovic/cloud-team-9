@@ -19,6 +19,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
       bucketName: 'cloud-cinema-movies-bucket', 
       versioned: true, 
       removalPolicy: cdk.RemovalPolicy.DESTROY
+      autoDeleteObjects: true
     });
 
     const movie_info_table = new dynamodb.Table(this, 'CloudCinemaMovieInfoTable', {
