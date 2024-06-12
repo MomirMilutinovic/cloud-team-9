@@ -9,6 +9,7 @@ bucket_name = os.environ['BUCKET_NAME']
 s3 = boto3.client('s3')
 
 def get_one(event, context):
+    # TODO: Make this lambda send a redirect to a S3 presigned url from which the movie will be downloaded
     try:
         movie_name = event['pathParameters']['movie_name']
         response = s3.get_object(Bucket=bucket_name, Key=movie_name)

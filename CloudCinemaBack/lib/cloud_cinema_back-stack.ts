@@ -38,8 +38,21 @@ export class CloudCinemaBackStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30)
     });
 
-    getMovie.addEnvironment("BUCKET_NAME",bucket.bucketName)
+    getMovie.addEnvironment("BUCKET_NAME", bucket.bucketName)
     bucket.grantRead(getMovie);
+
+
+    const startMovieUpload = new lambda.Function(this, 'StartMovieUploadFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'start_movie_upload.start_movie_upload', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    startMovieUpload.addEnvironment("BUCKET_NAME", bucket.bucketName)
+    startMovieUpload.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    bucket.grantWrite(startMovieUpload);
+    movie_info_table.grantWriteData(startMovieUpload);
 
     const api = new apigateway.RestApi(this, 'GetMovieApi', {
       restApiName: 'Get Movie Service',
@@ -47,9 +60,13 @@ export class CloudCinemaBackStack extends cdk.Stack {
       binaryMediaTypes:['*/*']
     });
 
-    const movies = api.root.addResource('movies').addResource('{movie_name}');
+    const moviesBase = api.root.addResource('movies');
+    const movies = moviesBase.addResource('{movie_name}');
     const getMovieIntegration = new apigateway.LambdaIntegration(getMovie);
     movies.addMethod('GET', getMovieIntegration);
+
+    const startMovieUploadIntegration = new apigateway.LambdaIntegration(startMovieUpload);
+    moviesBase.addMethod('POST', startMovieUploadIntegration)
 
 
 
