@@ -3,8 +3,10 @@ import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import path = require('path');
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import { MovieUploadStepFunction } from './movie_upload_step_function';
 
 
 
@@ -16,7 +18,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
     super(scope, id, props);
 
     const bucket = new s3.Bucket(this, 'CloudCinemaMoviesBucket', {
-      bucketName: 'cloud-cinema-movies-bucket', 
+      bucketName: 'cloud-cinema-movies-bucket-us', 
       versioned: true, 
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true
@@ -30,6 +32,11 @@ export class CloudCinemaBackStack extends cdk.Stack {
       readCapacity:1,            //u grupi pise da treba da se stave read i write na 1 da ne bi naplacivao
       writeCapacity:1
     });               
+
+    const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
+      movieSourceBucket: bucket,
+      movieTable: movie_info_table
+    });
 
     const getMovie = new lambda.Function(this, 'GetMovieFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
@@ -68,8 +75,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const startMovieUploadIntegration = new apigateway.LambdaIntegration(startMovieUpload);
     moviesBase.addMethod('POST', startMovieUploadIntegration)
 
-
-
+    const cfnMovieUploadStepFunction = movieUploadStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
+    startMovieUpload.addEnvironment('STATE_MACHINE_ARN', cfnMovieUploadStepFunction.attrArn);
+    movieUploadStepFunction.stateMachine.grantStartExecution(startMovieUpload);
 
   }
 }

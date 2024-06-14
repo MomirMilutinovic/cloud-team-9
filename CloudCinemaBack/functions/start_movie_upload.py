@@ -7,11 +7,12 @@ import boto3
 import base64
 
 
-
 bucket_name = os.environ['BUCKET_NAME']
 table_name = os.environ['TABLE_NAME']
+state_machine_arn = os.environ['STATE_MACHINE_ARN']
 dynamodb = boto3.resource('dynamodb')
 s3 = boto3.client('s3')
+sf = boto3.client('stepfunctions')
 
 def start_movie_upload(event, context):
     try:
@@ -24,7 +25,6 @@ def start_movie_upload(event, context):
         id = uuid.uuid4()
 
         table = dynamodb.Table(table_name)
-        # Put item into table
         response = table.put_item(
             Item={
                 'id': str(id),
@@ -40,15 +40,25 @@ def start_movie_upload(event, context):
         presigned_url = s3.generate_presigned_url('put_object', Params={
             'Bucket': bucket_name,
             'Key': str(id),
-            "Expires": 3600
-        }, HttpMethod="put")
+            'Expires': 3600,
+        }, ExpiresIn=3600, HttpMethod="PUT")
 
-        request_body['id'] = id
+        request_body['id'] = str(id)
         response_body = {
                 'movie': json.dumps(request_body, default=str),
                 'uploadUrl': presigned_url
 
         }
+
+        step_function_input = {
+            'id': str(id),
+            'timestamp': timestamp
+        }
+        sf.start_execution(
+            stateMachineArn = state_machine_arn,
+            input = json.dumps(step_function_input)
+        )
+
         return {
             'statusCode': 201,
             'body': json.dumps(response_body, default=str),
