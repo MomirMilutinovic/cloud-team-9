@@ -23,6 +23,11 @@ export class CloudCinemaBackStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true
     });
+    bucket.addCorsRule({
+      allowedOrigins: ['http://localhost:4200/'], // Dozvoljava pristup sa localhost-a
+      allowedMethods: [s3.HttpMethods.GET], // Dozvoljava samo GET zahteve
+      allowedHeaders: ['*'] // Dozvoljava sva zaglavlja
+    });
 
     const movie_info_table = new dynamodb.Table(this, 'CloudCinemaMovieInfoTable', {
       tableName: 'cloud-cinema-movie-info', 
