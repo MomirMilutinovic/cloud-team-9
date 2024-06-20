@@ -1,8 +1,67 @@
 .mainDiv {
-  background-image: url("../../../assets/images/background.jpg");
-  width: 100vw;
-  height: 100vh;
-  background-repeat: no-repeat;
+  background: url("../../../assets/images/background.jpg") no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
   background-size: cover;
-  max-width: 100%; /* Ensure image doesn't exceed viewport width */
+  height: 100%;
+  margin: 0;
+  padding-top: 100px;
+  padding-bottom: 100px;
 }
+h1{
+  margin: 0;
+  margin-left: 30px;
+  margin-top: 30px;
+  color: rgb(113, 146, 178);
+  text-shadow: 3px 3px rgba(37, 37, 37, 0.63);
+}
+.movie-container-wrapper, .series-container-wrapper {
+  position: relative;
+}
+
+.movie-container, .series-container {
+  display: flex;
+  overflow-x: scroll;
+  padding: 20px;
+  gap: 20px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+.movie-container::-webkit-scrollbar, .series-container::-webkit-scrollbar{ /* WebKit */
+  display: none;
+}
+
+
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px;
+  padding-top: 7px;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  cursor: pointer;
+  font-size: 24px;
+  user-select: none;
+  display: none;
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
+}
+
+.movie-container-wrapper:hover .arrow{
+  display: block;
+}
+.series-container-wrapper:hover .arrow{
+  display: block;
+}
+
