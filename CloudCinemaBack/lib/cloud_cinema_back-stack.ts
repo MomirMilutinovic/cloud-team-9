@@ -24,17 +24,18 @@ export class CloudCinemaBackStack extends cdk.Stack {
       autoDeleteObjects: true
     });
     bucket.addCorsRule({
-      allowedOrigins: ['http://localhost:4200/'], // Dozvoljava pristup sa localhost-a
-      allowedMethods: [s3.HttpMethods.GET], // Dozvoljava samo GET zahteve
-      allowedHeaders: ['*'] // Dozvoljava sva zaglavlja
-    });
+      allowedOrigins: ['https://cloud-cinema-front-bucket.s3.amazonaws.com'], 
+      allowedMethods: [s3.HttpMethods.GET],
+      allowedHeaders: ['*']
+    }); 
+
 
     const movie_info_table = new dynamodb.Table(this, 'CloudCinemaMovieInfoTable', {
       tableName: 'cloud-cinema-movie-info', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      readCapacity:1,            //u grupi pise da treba da se stave read i write na 1 da ne bi naplacivao
+      readCapacity:1,           
       writeCapacity:1
     });               
 

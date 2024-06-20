@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "aws-deploy":"aws s3 sync dist/cloud-cinema/ s3://cloud-cinema-front-bucket"
   },
   "private": true,
   "dependencies": {
