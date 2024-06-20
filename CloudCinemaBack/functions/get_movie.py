@@ -11,16 +11,15 @@ s3 = boto3.client('s3')
 def get_one(event, context):
     try:
         movie_name = event['pathParameters']['movie_name']
-        response = s3.get_object(Bucket=bucket_name, Key=movie_name)
-        data = response['Body'].read()
+        presigned_url = s3.generate_presigned_url('get_object', Params={
+            'Bucket': bucket_name,
+            'Key': movie_name
+        }, ExpiresIn=3600, HttpMethod="GET")
         return {
-            'statusCode': 200,
+            'statusCode': 302,
             'headers': {
-                'Content-Type': 'video/mp4',
-                'Content-Disposition': f'attachment; filename="{movie_name}"'
+                'Location': presigned_url,
             },
-            'body':  base64.b64encode(data).decode('utf-8'),
-            'isBase64Encoded': True 
         }
     except Exception as e:
         return {
