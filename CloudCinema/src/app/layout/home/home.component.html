@@ -1,3 +1,30 @@
 <div class="mainDiv">
+  <h1>Films</h1>
+  <div class="movie-container-wrapper">
+    <div class="movie-container">
+      <div *ngFor="let movie of movies">
+        <app-movie-card [movie]="movie"></app-movie-card>
+      </div>
+    </div>
+    <div class="arrow left-arrow" (click)="scrollLeft()"><mat-icon>keyboard_arrow_left</mat-icon></div>
+    <div class="arrow right-arrow" (click)="scrollRight()"><mat-icon>keyboard_arrow_right</mat-icon></div>
+  </div>
+<!--  <h1>Series</h1>-->
+<!--  <div class="series-container-wrapper">-->
+<!--    <div class="series-container">-->
+<!--      <div class="series-card" *ngFor="let show of series">-->
+<!--        <h2>{{ show.title }}</h2>-->
+<!--        <p><strong>Opis:</strong> {{ show.description }}</p>-->
+<!--        <p><strong>Žanr:</strong> {{ show.genre }}</p>-->
+<!--        <p><strong>Glumci:</strong> {{ show.actors }}</p>-->
+<!--        <div class="buttons">-->
+<!--          <button class="btn download" (click)="download()"><mat-icon>get_app</mat-icon></button>-->
+<!--          <button class="btn play"><mat-icon>play_circle_outline</mat-icon></button>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="arrow left-arrow" (click)="scrollLeftSeries()"><mat-icon>keyboard_arrow_left</mat-icon></div>-->
+<!--    <div class="arrow right-arrow" (click)="scrollRightSeries()"><mat-icon>keyboard_arrow_right</mat-icon></div>-->
+<!--  </div>-->
 </div>
 

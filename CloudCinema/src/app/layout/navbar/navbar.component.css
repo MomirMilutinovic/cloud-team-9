@@ -1,8 +1,8 @@
 mat-toolbar {
-  background-color: rgba(206, 201, 201, 0.30);
+  background-color: rgba(206, 201, 201, 0.38);
   align-items: center;
   height: 80px;
-  position: fixed;
+  position: absolute;
 }
 
 .logo {
