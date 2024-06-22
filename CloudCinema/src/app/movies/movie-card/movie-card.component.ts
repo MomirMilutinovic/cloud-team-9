@@ -19,16 +19,16 @@ export class MovieCardComponent {
     // @ts-ignore
     this.movieService.getMovie().subscribe(
       (response: HttpResponse<any>) => {
-        if (response.status === 302) {
-          const redirectUrl = response.headers.get('Location');
-          if (redirectUrl) {
-            window.location.href = redirectUrl;
-          } else {
-            console.error('Error: No redirect URL found');
-          }
-        } else {
-          console.error('Unexpected status code:', response.status);
-        }
+        let dataType = response.type;
+        let binaryData = [];
+        binaryData.push(response.body);
+        let downloadLink = document.createElement('a');
+        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, {type: dataType.toString()}));
+        if (movieName)
+            downloadLink.setAttribute('download', movieName);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.parentNode?.removeChild(downloadLink);
       },
       error => {
         console.error('Error:', error);

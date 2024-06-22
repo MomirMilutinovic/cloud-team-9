@@ -9,11 +9,12 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "aws-deploy":"aws s3 sync dist/cloud-cinema/ s3://cloud-cinema-front-bucket"
+    "aws-deploy": "aws s3 sync dist/cloud-cinema/ s3://cloud-cinema-front-bucket"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "^16.2.0",
+    "@angular/cdk": "^16.0.0",
     "@angular/common": "^16.2.0",
     "@angular/compiler": "^16.2.0",
     "@angular/core": "^16.2.0",

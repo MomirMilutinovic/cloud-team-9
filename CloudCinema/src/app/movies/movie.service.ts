@@ -18,6 +18,6 @@ export class MovieService {
 
   getMovie(name: string): Observable<HttpResponse<any>>  {
     const url = environment.apiHost+'movies/bunny.mp4';
-    return this.httpClient.get<any>(url, { observe: 'response' });
+    return this.httpClient.get<any>(url, {responseType: 'blob' as 'json', observe: 'response' });
   }
 }
