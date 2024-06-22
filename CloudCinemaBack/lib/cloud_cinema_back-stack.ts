@@ -24,7 +24,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
       autoDeleteObjects: true
     });
     bucket.addCorsRule({
-      allowedOrigins: ['https://cloud-cinema-front-bucket.s3.amazonaws.com'], 
+      allowedOrigins: ['*'], 
       allowedMethods: [s3.HttpMethods.GET],
       allowedHeaders: ['*']
     }); 
@@ -70,7 +70,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, 'GetMovieApi', {
       restApiName: 'Get Movie Service',
       description: 'This service gets movies.',
-      binaryMediaTypes:['*/*']
+      binaryMediaTypes:['*/*'],
+      defaultCorsPreflightOptions:
+      {
+        allowOrigins:["https://cloud-cinema-front-bucket.s3.amazonaws.com"],
+        allowMethods: apigateway.Cors.ALL_METHODS
+      }
     });
 
     const moviesBase = api.root.addResource('movies');
