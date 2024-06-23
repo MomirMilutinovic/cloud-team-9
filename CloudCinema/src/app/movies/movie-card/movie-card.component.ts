@@ -17,18 +17,25 @@ export class MovieCardComponent {
 
   download(movieName: string | undefined) {
     // @ts-ignore
-    this.movieService.getMovie(movieName).subscribe((response: HttpResponse<any>) => {
-      const url = response.headers.get('Location');
-      if (url) {
-        window.location.href = url;
-      } else {
-        alert('Error: Unable to download movie');
+    this.movieService.getMovie().subscribe(
+      (response: HttpResponse<any>) => {
+        let dataType = response.type;
+        let binaryData = [];
+        binaryData.push(response.body);
+        let downloadLink = document.createElement('a');
+        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, {type: dataType.toString()}));
+        if (movieName)
+            downloadLink.setAttribute('download', movieName);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.parentNode?.removeChild(downloadLink);
+      },
+      error => {
+        console.error('Error:', error);
       }
-    }, error => {
-      console.error('Error:', error);
-      alert('Error: ' + error.message);
-    });
+    );
   }
+
 
 
 }

@@ -13,11 +13,13 @@ def get_one(event, context):
         movie_name = event['pathParameters']['movie_name']
         presigned_url = s3.generate_presigned_url('get_object', Params={
             'Bucket': bucket_name,
-            'Key': movie_name
+            'Key': movie_name,
+            'ResponseContentDisposition': f'attachment; filename="${movie_name}"'
         }, ExpiresIn=3600, HttpMethod="GET")
         return {
             'statusCode': 302,
             'headers': {
+                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com',
                 'Location': presigned_url,
             },
         }
