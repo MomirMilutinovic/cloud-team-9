@@ -8,7 +8,7 @@
   <div class="buttons">
     <button class="btn download" (click)="download(movie.id)"><mat-icon>get_app</mat-icon></button>
     <button class="btn delete"><mat-icon>delete</mat-icon></button>
-    <button class="btn edit" (click)="edit(movie.id,movie.timestamp)"><mat-icon>edit</mat-icon></button>
+    <button class="btn edit" (click)="edit(movie.id,movie.timestamp)" [routerLink]="['movies/movieEdit',movie.id, movie.timestamp]"><mat-icon>edit</mat-icon></button>
     <button class="btn play"><mat-icon>play_circle_outline</mat-icon></button>
   </div>
 </div>

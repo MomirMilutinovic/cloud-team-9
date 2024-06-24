@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {MovieInfo} from "../models/models.module";
 import {MovieService} from "../movie.service";
 import {HttpResponse} from "@angular/common/http";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-movie-card',
@@ -12,7 +13,7 @@ export class MovieCardComponent {
   @Input()
   movie: MovieInfo;
 
-  constructor(private movieService: MovieService) {
+  constructor(private movieService: MovieService, private router:Router) {
   }
 
   download(movieId: string | undefined) {
@@ -37,10 +38,6 @@ export class MovieCardComponent {
   }
 
   edit(id: string | undefined, timestamp: number | undefined) {
-    // @ts-ignore
-    this.movieService.getMovieInfo(id,timestamp).subscribe(value => {
-      console.log(value);
-    });
-
+    // this.router.navigate(["/movies/movieEdit", id, timestamp]);
   }
 }
