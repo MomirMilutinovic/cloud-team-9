@@ -15,17 +15,17 @@ export class MovieCardComponent {
   constructor(private movieService: MovieService) {
   }
 
-  download(movieName: string | undefined) {
+  download(movieId: string | undefined) {
     // @ts-ignore
-    this.movieService.getMovie().subscribe(
+    this.movieService.getMovie(movieId).subscribe(
       (response: HttpResponse<any>) => {
         let dataType = response.type;
         let binaryData = [];
         binaryData.push(response.body);
         let downloadLink = document.createElement('a');
         downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, {type: dataType.toString()}));
-        if (movieName)
-            downloadLink.setAttribute('download', movieName);
+        if (movieId)
+            downloadLink.setAttribute('download', movieId);
         document.body.appendChild(downloadLink);
         downloadLink.click();
         downloadLink.parentNode?.removeChild(downloadLink);
@@ -36,6 +36,11 @@ export class MovieCardComponent {
     );
   }
 
+  edit(id: string | undefined, timestamp: number | undefined) {
+    // @ts-ignore
+    this.movieService.getMovieInfo(id,timestamp).subscribe(value => {
+      console.log(value);
+    });
 
-
+  }
 }

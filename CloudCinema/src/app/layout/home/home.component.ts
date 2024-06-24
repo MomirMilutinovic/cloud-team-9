@@ -1,35 +1,26 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MovieInfo} from "../../movies/models/models.module";
 import {getDownlevelDecoratorsTransform} from "@angular/compiler-cli/src/transformers/downlevel_decorators_transform";
+
+import {MovieService} from "../../movies/movie.service";
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
-  movies: MovieInfo[] = [
-    {
-      title: 'Naziv Filma 1',
-      description: 'Ovo je opis filma 1.',
-      genres: ['Akcija']
-    },
-    {
-      title: 'Naziv Filma 1',
-      description: 'Ovo je opis filma 1.',
-      genres: ['Akcija']
-    },
-    {
-      title: 'Naziv Filma 1',
-      description: 'Ovo je opis filma 1.',
-      genres: ['Akcija']
-    },
-    {
-      title: 'Naziv Filma 1',
-      description: 'Ovo je opis filma 1.',
-      genres: ['Akcija','nesto']
-    }
-  ];
+export class HomeComponent implements OnInit{
+  movies: MovieInfo[] = [];
+  constructor(private movieService:MovieService) {}
+
+
+  ngOnInit(): void {
+    this.movieService.getAll().subscribe(value => {
+      this.movies=value;
+    },error => {
+      console.error('Error fetching movies:', error);
+    });
+  }
 
   scrollLeft(): void {
     const container = document.querySelector('.movie-container') as HTMLElement;
@@ -61,4 +52,6 @@ export class HomeComponent {
       behavior: 'smooth'
     });
   }
+
+
 }
