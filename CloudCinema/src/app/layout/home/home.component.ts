@@ -11,7 +11,6 @@ import {MovieService} from "../../movies/movie.service";
 })
 export class HomeComponent implements OnInit{
   movies: MovieInfo[] = [];
-
   constructor(private movieService:MovieService) {}
 
 

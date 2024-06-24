@@ -6,4 +6,5 @@ export interface MovieInfo{
   actors?:string[];
   director?:string;
   year?:number;
+  timestamp?:number;
 }

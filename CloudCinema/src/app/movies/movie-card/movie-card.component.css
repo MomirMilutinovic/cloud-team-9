@@ -38,6 +38,12 @@
 .play {
   background-color: rgb(113, 146, 178);
 }
+.delete{
+  background-color: rgba(114, 113, 113, 0.82);
+}
+.edit{
+  background-color: rgba(114, 113, 113, 0.82);
+}
 
 .btn:hover {
   opacity: 0.8;

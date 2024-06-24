@@ -36,6 +36,11 @@ export class MovieCardComponent {
     );
   }
 
+  edit(id: string | undefined, timestamp: number | undefined) {
+    // @ts-ignore
+    this.movieService.getMovieInfo(id,timestamp).subscribe(value => {
+      console.log(value);
+    });
 
-
+  }
 }

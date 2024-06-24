@@ -54,6 +54,15 @@ export class CloudCinemaBackStack extends cdk.Stack {
     getMovie.addEnvironment("BUCKET_NAME", bucket.bucketName)
     bucket.grantRead(getMovie);
 
+    const getMovieInfo = new lambda.Function(this, 'GetMovieInfoFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'get_movies_info.get_one', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    getMovieInfo.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    movie_info_table.grantReadData(getMovieInfo);
 
     const startMovieUpload = new lambda.Function(this, 'StartMovieUploadFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
@@ -79,9 +88,13 @@ export class CloudCinemaBackStack extends cdk.Stack {
     });
 
     const moviesBase = api.root.addResource('movies');
-    const movies = moviesBase.addResource('{movie_name}');
+    const moviesDownload = moviesBase.addResource('download').addResource('{movie_id}');
     const getMovieIntegration = new apigateway.LambdaIntegration(getMovie);
-    movies.addMethod('GET', getMovieIntegration);
+    moviesDownload.addMethod('GET', getMovieIntegration);
+
+    const movieInfoBase = api.root.addResource('movie_info')
+    const getMovieInfoIntegration = new apigateway.LambdaIntegration(getMovieInfo);
+    movieInfoBase.addMethod('GET', getMovieInfoIntegration);
 
     const startMovieUploadIntegration = new apigateway.LambdaIntegration(startMovieUpload);
     moviesBase.addMethod('POST', startMovieUploadIntegration)
@@ -100,7 +113,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
     getMoviesInfo.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(getMoviesInfo);
 
-    const moviesInfoBase = api.root.addResource('movies_info');
+    const moviesInfoBase = api.root.addResource('movies_info')
     const getMoviesInfoIntegration = new apigateway.LambdaIntegration(getMoviesInfo);
     moviesInfoBase.addMethod('GET', getMoviesInfoIntegration);
 
