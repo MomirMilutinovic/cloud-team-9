@@ -90,5 +90,20 @@ export class CloudCinemaBackStack extends cdk.Stack {
     startMovieUpload.addEnvironment('STATE_MACHINE_ARN', cfnMovieUploadStepFunction.attrArn);
     movieUploadStepFunction.stateMachine.grantStartExecution(startMovieUpload);
 
+    const getMoviesInfo = new lambda.Function(this, 'GetMoviesInfoFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'get_movies_info.get_all', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    getMoviesInfo.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    movie_info_table.grantReadData(getMoviesInfo);
+
+    const moviesInfoBase = api.root.addResource('movies_info');
+    const getMoviesInfoIntegration = new apigateway.LambdaIntegration(getMoviesInfo);
+    moviesInfoBase.addMethod('GET', getMoviesInfoIntegration);
+
+
   }
 }

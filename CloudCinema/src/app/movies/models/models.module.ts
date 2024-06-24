@@ -1,8 +1,9 @@
 export interface MovieInfo{
   id?:string;
-  title?:string;
+  name?:string;
   description?:string;
   genres?:string[];
   actors?:string[];
-  directors?:string[];
+  director?:string;
+  year?:number;
 }
