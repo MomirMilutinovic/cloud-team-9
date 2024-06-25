@@ -65,4 +65,12 @@ export class MovieService {
     const url = environment.apiHost + 'movie_info';
     return this.httpClient.put<any>(url,  info, {headers})
   }
+
+  deleteMovie(id: string, timestamp: number) {
+    const url = environment.apiHost + 'movies/' + id;
+    let params = new HttpParams();
+    params = params.append('movie_id', id);
+    params = params.append('timestamp', timestamp);
+    return this.httpClient.delete<any>(url, {params});
+  }
 }

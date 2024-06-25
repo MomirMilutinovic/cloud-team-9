@@ -15,13 +15,12 @@ def edit_one(event, context):
     try:
         if event['httpMethod'] == 'OPTIONS':
             return {
-                'statusCode': 200,
+                'statusCode': 204,
                 'headers': {
                     'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
                     'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
                     'Access-Control-Allow-Origin': 'https://cloud-cinema-front-bucket.s3.amazonaws.com' 
                 },
-                'body': json.dumps('OPTIONS request handled successfully')
             }
 
         request_body = json.loads(base64.b64decode(event['body']).decode('utf-8'))
@@ -75,4 +74,17 @@ def edit_one(event, context):
         return {
             'statusCode': 500,
             'body': 'Error: {}'.format(str(e))
+        }
+    
+
+
+def edit_one3(event, context):
+    return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com',
+                'Access-Control-Allow-Methods': 'PUT,OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
+            }
         }

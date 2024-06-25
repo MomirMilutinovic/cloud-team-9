@@ -40,4 +40,16 @@ export class MovieCardComponent {
   edit(id: string | undefined, timestamp: number | undefined) {
     // this.router.navigate(["/movies/movieEdit", id, timestamp]);
   }
+
+  delete(movie: MovieInfo) {
+    // @ts-ignore
+    this.movieService.deleteMovie(movie.id, movie.timestamp).subscribe(
+      (response: HttpResponse<any>) => {
+        console.log("SUCCESS!")
+      },
+      error => {
+        console.error('Error:', error);
+      }
+    );
+  }
 }

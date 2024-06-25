@@ -7,11 +7,9 @@ import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import path = require('path');
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { MovieUploadStepFunction } from './movie_upload_step_function';
+import { MovieDeleteStepFunction } from './movie_delete_step_function';
 
 
-
-
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class CloudCinemaBackStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -25,7 +23,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
     });
     bucket.addCorsRule({
       allowedOrigins: ['*'], 
-      allowedMethods: [s3.HttpMethods.GET],
+      allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.DELETE],
       allowedHeaders: ['*']
     }); 
 
@@ -38,9 +36,13 @@ export class CloudCinemaBackStack extends cdk.Stack {
       readCapacity:1,           
       writeCapacity:1
     });      
-        
 
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
+      movieSourceBucket: bucket,
+      movieTable: movie_info_table
+    });
+
+    const movieDeleteStepFunction = new MovieDeleteStepFunction(this, 'MovieDeleteStepFunction', {
       movieSourceBucket: bucket,
       movieTable: movie_info_table
     });
@@ -76,6 +78,14 @@ export class CloudCinemaBackStack extends cdk.Stack {
     startMovieUpload.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     bucket.grantWrite(startMovieUpload);
     movie_info_table.grantWriteData(startMovieUpload);
+
+
+    const startMovieDelete = new lambda.Function(this, 'StartMovieDeleteFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'start_delete_movie.start_delete_movie', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
 
     const editMovieInfo = new lambda.Function(this, 'EditMovieInfoFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
@@ -116,9 +126,17 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const startMovieUploadIntegration = new apigateway.LambdaIntegration(startMovieUpload);
     moviesBase.addMethod('POST', startMovieUploadIntegration)
 
+    const startMovieDeleteIntegration = new apigateway.LambdaIntegration(startMovieDelete);
+    moviesBase.addMethod('DELETE', startMovieDeleteIntegration)
+
     const cfnMovieUploadStepFunction = movieUploadStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
     startMovieUpload.addEnvironment('STATE_MACHINE_ARN', cfnMovieUploadStepFunction.attrArn);
     movieUploadStepFunction.stateMachine.grantStartExecution(startMovieUpload);
+
+
+    const cfnMovieDeleteStepFunction = movieDeleteStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
+    startMovieDelete.addEnvironment('STATE_MACHINE_ARN', cfnMovieDeleteStepFunction.attrArn);
+    movieDeleteStepFunction.stateMachine.grantStartExecution(startMovieDelete);
 
     const getMoviesInfo = new lambda.Function(this, 'GetMoviesInfoFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
@@ -133,7 +151,5 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const moviesInfoBase = api.root.addResource('movies_info')
     const getMoviesInfoIntegration = new apigateway.LambdaIntegration(getMoviesInfo);
     moviesInfoBase.addMethod('GET', getMoviesInfoIntegration);
-
-
   }
 }
