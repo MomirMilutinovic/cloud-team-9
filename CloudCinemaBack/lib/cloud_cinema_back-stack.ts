@@ -76,6 +76,35 @@ export class CloudCinemaBackStack extends cdk.Stack {
     bucket.grantWrite(startMovieUpload);
     movie_info_table.grantWriteData(startMovieUpload);
 
+
+    // movie_info_table.addGlobalSecondaryIndex({
+    //   indexName: 'NameIndex',
+    //   partitionKey: { name: 'name', type: dynamodb.AttributeType.STRING },
+    //   projectionType: dynamodb.ProjectionType.ALL,
+    // });
+
+    // movie_info_table.addGlobalSecondaryIndex({
+    //   indexName: 'GenreIndex',
+    //   partitionKey: { name: 'genre', type: dynamodb.AttributeType.STRING },
+    //   projectionType: dynamodb.ProjectionType.ALL,
+    // });
+   
+    // movie_info_table.addGlobalSecondaryIndex({
+    //   indexName: 'ActorsIndex',
+    //   partitionKey: { name: 'actors', type: dynamodb.AttributeType.STRING },
+    //   projectionType: dynamodb.ProjectionType.ALL, 
+    // });
+
+    const searchMovies = new lambda.Function(this, 'SearchMoviesFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'movies_search.get_all', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    searchMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    movie_info_table.grantReadData(searchMovies);
+
     const api = new apigateway.RestApi(this, 'GetMovieApi', {
       restApiName: 'Get Movie Service',
       description: 'This service gets movies.',
@@ -116,6 +145,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const moviesInfoBase = api.root.addResource('movies_info')
     const getMoviesInfoIntegration = new apigateway.LambdaIntegration(getMoviesInfo);
     moviesInfoBase.addMethod('GET', getMoviesInfoIntegration);
+
+    const moviesSearch = moviesBase.addResource('search');
+    const searchMovieIntegration = new apigateway.LambdaIntegration(searchMovies);
+    moviesSearch.addMethod('GET', searchMovieIntegration);
 
 
   }
