@@ -249,7 +249,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
     });
 
     const editMovieInfoIntegration = new apigateway.LambdaIntegration(editMovieInfo);
-    movieInfoBase.addMethod('PUT', editMovieInfoIntegration);
+    movieInfoBase.addMethod('PUT', editMovieInfoIntegration, {
+      authorizer: adminAuthorizer
+    });
 
     const startMovieUploadIntegration = new apigateway.LambdaIntegration(startMovieUpload);
     moviesBase.addMethod('POST', startMovieUploadIntegration, {
@@ -257,7 +259,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
     })
 
     const startMovieDeleteIntegration = new apigateway.LambdaIntegration(startMovieDelete);
-    moviesBase.addMethod('DELETE', startMovieDeleteIntegration)
+    moviesBase.addMethod('DELETE', startMovieDeleteIntegration, {
+      authorizer: adminAuthorizer,
+    })
 
     const cfnMovieUploadStepFunction = movieUploadStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
     startMovieUpload.addEnvironment('STATE_MACHINE_ARN', cfnMovieUploadStepFunction.attrArn);
