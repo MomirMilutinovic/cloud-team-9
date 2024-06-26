@@ -52,8 +52,8 @@ export class EditMovieComponent implements OnInit{
       name: this.movieForm.value.name as string,
       description: this.movieForm.value.description as string,
       director: this.movieForm.value.director as string,
-      genres:[],
-      actors:[],
+      genres: this.movieForm.value.genres.toString().split(','),
+      actors: this.movieForm.value.actors.toString().split(','),
       year: this.movieForm.value.year as number,
       timestamp: this.movie.timestamp,
     };

@@ -30,6 +30,7 @@ def edit_one(event, context):
         actors = request_body['actors']
         year = int(request_body['year'])
         id = request_body['id']
+        genres = request_body['genres']
 
         table = dynamodb.Table(table_name)
 
@@ -38,18 +39,20 @@ def edit_one(event, context):
                 'id': id,
                 'timestamp': timestamp
             },
-            UpdateExpression='SET #name = :name, #director = :director, #actors = :actors, #year = :year',
+            UpdateExpression='SET #name = :name, #director = :director, #actors = :actors, #year = :year, #genres = :genres',
             ExpressionAttributeNames={
                 '#name': 'name',
                 '#director': 'director',
                 '#actors': 'actors',
-                '#year': 'year'
+                '#year': 'year',
+                '#genres': 'genres'
             },
             ExpressionAttributeValues={
                 ':name': name,
                 ':director': director,
                 ':actors': actors,
-                ':year': year
+                ':year': year,
+                ':genres': genres
             },
             ReturnValues='ALL_NEW'
         )
@@ -73,7 +76,12 @@ def edit_one(event, context):
         print(event['body'])
         return {
             'statusCode': 500,
-            'body': 'Error: {}'.format(str(e))
+            'body': 'Error: {}'.format(str(e)),
+            'headers': {
+                'Access-Control-Allow-Origin':'*',
+                'Access-Control-Allow-Methods': 'PUT,OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
+            }
         }
     
 
