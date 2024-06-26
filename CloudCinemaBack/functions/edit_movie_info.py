@@ -19,11 +19,11 @@ def edit_one(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
                     'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
-                    'Access-Control-Allow-Origin': 'https://cloud-cinema-front-bucket.s3.amazonaws.com' 
+                    'Access-Control-Allow-Origin': '*' 
                 },
             }
 
-        request_body = json.loads(base64.b64decode(event['body']).decode('utf-8'))
+        request_body = json.loads(event['body'])
         name = request_body['name']
         timestamp = int(request_body['timestamp'])
         director = request_body['director']
@@ -61,7 +61,7 @@ def edit_one(event, context):
             'body': json.dumps(updated_item, default=str),
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com',
+                'Access-Control-Allow-Origin':'*',
                 'Access-Control-Allow-Methods': 'PUT,OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
             }

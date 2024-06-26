@@ -229,7 +229,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
           'X-Amz-Date',
           'Authorization',
           'X-Api-Key',
+          'Access-Control-Allow-Headers',
+          'Access-Control-Allow-Methods'
         ],
+        allowCredentials: true
       },
     });
 
