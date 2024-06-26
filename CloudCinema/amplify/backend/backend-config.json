@@ -1,0 +1,45 @@
+{
+  "auth": {
+    "cloudcinema4fcfe4f7": {
+      "customAuth": false,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "serviceType": "imported"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_auth_cloudcinema4fcfe4f7_nativeClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "cloudcinema4fcfe4f7"
+        }
+      ]
+    },
+    "AMPLIFY_auth_cloudcinema4fcfe4f7_userPoolId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "cloudcinema4fcfe4f7"
+        }
+      ]
+    },
+    "AMPLIFY_auth_cloudcinema4fcfe4f7_userPoolName": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "cloudcinema4fcfe4f7"
+        }
+      ]
+    },
+    "AMPLIFY_auth_cloudcinema4fcfe4f7_webClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "cloudcinema4fcfe4f7"
+        }
+      ]
+    }
+  }
+}

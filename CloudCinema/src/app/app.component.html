@@ -1,2 +1,12 @@
-<app-navbar></app-navbar>
-<router-outlet></router-outlet>
+<amplify-authenticator 
+    [loginMechanisms]="['email']"
+    [signUpAttributes]="['email', 'given_name', 'family_name']">
+    <ng-template
+      amplifySlot="authenticated"
+      let-user="user"
+      let-signOut="signOut"
+    >
+        <app-navbar></app-navbar>
+        <router-outlet></router-outlet>
+    </ng-template>
+  </amplify-authenticator>

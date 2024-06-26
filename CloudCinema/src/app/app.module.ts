@@ -9,7 +9,26 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatIconModule} from "@angular/material/icon";
 import {NavbarComponent} from "./layout/navbar/navbar.component";
 import {MoviesModule} from "./movies/movies.module";
-import {HttpClientModule} from "@angular/common/http";
+import {HttpClientModule, HTTP_INTERCEPTORS} from "@angular/common/http";
+import { Amplify } from 'aws-amplify';
+import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
+
+import awsconfig from '../aws-exports';
+import { JWTInterceptor } from './http-interceptors/jwt.interceptor';
+
+Amplify.configure(awsconfig);
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolClientId: '6tj009mjqr69l1vocv6ds506k9',
+      userPoolId: 'us-east-1_GEFfqsKS2',
+      loginWith: {
+        email: true
+      }
+    }
+  }
+});
+
 
 @NgModule({
   declarations: [
@@ -22,9 +41,16 @@ import {HttpClientModule} from "@angular/common/http";
     LayoutModule,
     MaterialModule,
     MoviesModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    AmplifyAuthenticatorModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JWTInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

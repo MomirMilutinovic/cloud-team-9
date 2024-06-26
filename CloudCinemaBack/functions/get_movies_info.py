@@ -16,7 +16,7 @@ def get_all(event, context):
             'body': json.dumps(response['Items'],default=str),
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com'
+                'Access-Control-Allow-Origin': '*'
             },
         }
     except Exception as e:
@@ -44,7 +44,7 @@ def get_one(event, context):
             'body': json.dumps(response['Item'], default=str),
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com'
+                'Access-Control-Allow-Origin': '*'
             },
         }
     except Exception as e:

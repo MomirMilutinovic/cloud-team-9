@@ -1,0 +1,25 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-cloudcinema-dev-e4c2c-authRole",
+      "UnauthRoleArn": "arn:aws:iam::905418279999:role/amplify-cloudcinema-dev-e4c2c-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::905418279999:role/amplify-cloudcinema-dev-e4c2c-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-cloudcinema-dev-e4c2c-deployment",
+      "UnauthRoleName": "amplify-cloudcinema-dev-e4c2c-unauthRole",
+      "StackName": "amplify-cloudcinema-dev-e4c2c",
+      "StackId": "arn:aws:cloudformation:us-east-1:905418279999:stack/amplify-cloudcinema-dev-e4c2c/fb7b3c40-33a6-11ef-949b-0e984e446999",
+      "AmplifyAppId": "d388s4g3rs96oh"
+    },
+    "categories": {
+      "auth": {
+        "cloudcinema4fcfe4f7": {
+          "userPoolId": "us-east-1_GEFfqsKS2",
+          "userPoolName": "cinema-user-pool",
+          "webClientId": "6tj009mjqr69l1vocv6ds506k9",
+          "nativeClientId": "6tj009mjqr69l1vocv6ds506k9"
+        }
+      }
+    }
+  }
+}

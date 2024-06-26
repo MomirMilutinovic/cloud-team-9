@@ -220,13 +220,17 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, 'GetMovieApi', {
       restApiName: 'Get Movie Service',
       description: 'This service gets movies.',
-      binaryMediaTypes:['*/*'],
       defaultCorsPreflightOptions:
       {
-        allowOrigins:["https://cloud-cinema-front-bucket.s3.amazonaws.com"],
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: ['Content-Type','Authorization', 'X-Amz-Date', 'X-Api-Key', 'X-Amz-Security-Token']
-      }
+        allowHeaders: [
+          'Content-Type',
+          'X-Amz-Date',
+          'Authorization',
+          'X-Api-Key',
+        ],
+      },
     });
 
     const moviesBase = api.root.addResource('movies');
