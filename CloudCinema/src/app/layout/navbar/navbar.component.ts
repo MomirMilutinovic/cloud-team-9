@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { signOut } from 'aws-amplify/auth';
 
 @Component({
   selector: 'app-navbar',
@@ -12,4 +13,9 @@ export class NavbarComponent {
     "Horror",
     "Romance"
   ];
+
+  signOut() {
+    signOut();
+  }
+
 }
