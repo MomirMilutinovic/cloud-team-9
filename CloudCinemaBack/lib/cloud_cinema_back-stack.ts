@@ -243,7 +243,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const movieInfoBase = api.root.addResource('movie_info')
     const getMovieInfoIntegration = new apigateway.LambdaIntegration(getMovieInfo);
-    movieInfoBase.addMethod('GET', getMovieInfoIntegration);
+    movieInfoBase.addMethod('GET', getMovieInfoIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
 
     const editMovieInfoIntegration = new apigateway.LambdaIntegration(editMovieInfo);
     movieInfoBase.addMethod('PUT', editMovieInfoIntegration);
@@ -277,6 +280,11 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const moviesInfoBase = api.root.addResource('movies_info')
     const getMoviesInfoIntegration = new apigateway.LambdaIntegration(getMoviesInfo);
-    moviesInfoBase.addMethod('GET', getMoviesInfoIntegration);
+    moviesInfoBase.addMethod('GET', getMoviesInfoIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+
   }
 }
