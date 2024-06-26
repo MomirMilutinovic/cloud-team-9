@@ -6,5 +6,10 @@ import { Component } from '@angular/core';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
-
+  genres: string[] = [
+    "Action",
+    "Comedy",
+    "Horror",
+    "Romance"
+  ];
 }
