@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { signOut } from 'aws-amplify/auth';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -14,8 +15,11 @@ export class NavbarComponent {
     "Romance"
   ];
 
+  constructor(private authService: AuthService) {
+
+  }
   signOut() {
-    signOut();
+    this.authService.signOut();
   }
 
 }
