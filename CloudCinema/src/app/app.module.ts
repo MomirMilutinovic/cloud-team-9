@@ -16,7 +16,6 @@ import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
 import awsconfig from '../aws-exports';
 import { JWTInterceptor } from './http-interceptors/jwt.interceptor';
 
-Amplify.configure(awsconfig);
 Amplify.configure({
   Auth: {
     Cognito: {
