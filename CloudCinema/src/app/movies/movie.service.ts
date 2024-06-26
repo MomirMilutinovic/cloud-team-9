@@ -58,7 +58,7 @@ export class MovieService {
   }
 
   deleteMovie(id: string, timestamp: number) {
-    const url = environment.apiHost + 'movies/' + id;
+    const url = environment.apiHost + 'movies';
     let params = new HttpParams();
     params = params.append('movie_id', id);
     params = params.append('timestamp', timestamp);
