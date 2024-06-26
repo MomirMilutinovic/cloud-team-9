@@ -16,9 +16,10 @@ export class MovieService {
     const url = environment.apiHost + 'movies_info';
     return this.httpClient.get<any[]>(url)
     .pipe(map(response => {
-        return response.length > 0 ? response.map(({ id, name, actors, director, year,timestamp }) => ({
+        return response.length > 0 ? response.map(({ id, name, genres, actors, director, year, timestamp }) => ({
           id: id.S,
           name: name.S,
+          genres: genres?.L.map((genre: { S: string }) => genre.S) || [],
           actors: actors?.L.map((actor: { S: string }) => actor.S) || [],
           director: director.S,
           year: year ? parseInt(year.N, 10) : undefined,
