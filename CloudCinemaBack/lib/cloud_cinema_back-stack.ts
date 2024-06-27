@@ -180,7 +180,15 @@ export class CloudCinemaBackStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
       writeCapacity:1
-    });      
+    }); 
+    
+    const movie_search_table = new dynamodb.Table(this, 'CloudCinemaMovieSearchTable', {
+      tableName: 'cloud-cinema-movie-search', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,           
+      writeCapacity:1
+    });  
 
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
@@ -221,8 +229,31 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     startMovieUpload.addEnvironment("BUCKET_NAME", bucket.bucketName)
     startMovieUpload.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    startMovieUpload.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
+
     bucket.grantWrite(startMovieUpload);
     movie_info_table.grantWriteData(startMovieUpload);
+    movie_search_table.grantWriteData(startMovieUpload);
+
+
+    movie_search_table.addGlobalSecondaryIndex({
+      indexName: 'SearchIndex',
+      partitionKey: { name: 'attributes', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    const searchMovies = new lambda.Function(this, 'SearchMoviesFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'movies_search.get_all', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    searchMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    movie_info_table.grantReadData(searchMovies);
+
+    searchMovies.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
+    movie_info_table.grantReadData(searchMovies);
 
 
     const startMovieDelete = new lambda.Function(this, 'StartMovieDeleteFunction', {
@@ -318,6 +349,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
       authorizer: userAuthorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO 
     });
+
+    const moviesSearch = moviesBase.addResource('search');
+    const searchMovieIntegration = new apigateway.LambdaIntegration(searchMovies);
+    moviesSearch.addMethod('GET', searchMovieIntegration);
 
 
   }
