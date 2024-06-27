@@ -13,7 +13,6 @@ export class HomeComponent implements OnInit{
   movies: MovieInfo[] = [];
   constructor(private movieService:MovieService) {}
 
-
   ngOnInit(): void {
     this.movieService.getAll().subscribe(value => {
       this.movies=value;

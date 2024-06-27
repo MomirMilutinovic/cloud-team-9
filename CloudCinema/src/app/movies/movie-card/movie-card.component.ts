@@ -1,18 +1,27 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {MovieInfo} from "../models/models.module";
 import {MovieService} from "../movie.service";
 import {HttpResponse} from "@angular/common/http";
+import {Router} from "@angular/router";
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-movie-card',
   templateUrl: './movie-card.component.html',
   styleUrls: ['./movie-card.component.css']
 })
-export class MovieCardComponent {
+export class MovieCardComponent implements OnInit {
   @Input()
   movie: MovieInfo;
 
-  constructor(private movieService: MovieService) {
+  editDisabled = true;
+
+  constructor(private movieService: MovieService, private authService: AuthService, private router: Router) {
+    this.editDisabled = true;
+  }
+
+  ngOnInit(): void {
+    this.authService.isAdmin().then((isAdmin) => this.editDisabled = !isAdmin)
   }
 
   download(movieId: string | undefined) {
@@ -37,10 +46,18 @@ export class MovieCardComponent {
   }
 
   edit(id: string | undefined, timestamp: number | undefined) {
-    // @ts-ignore
-    this.movieService.getMovieInfo(id,timestamp).subscribe(value => {
-      console.log(value);
-    });
+    // this.router.navigate(["/movies/movieEdit", id, timestamp]);
+  }
 
+  delete(movie: MovieInfo) {
+    // @ts-ignore
+    this.movieService.deleteMovie(movie.id, movie.timestamp).subscribe(
+      (response: HttpResponse<any>) => {
+        console.log("SUCCESS!")
+      },
+      error => {
+        console.error('Error:', error);
+      }
+    );
   }
 }

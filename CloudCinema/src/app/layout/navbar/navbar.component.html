@@ -1,3 +1,4 @@
+<form>
 <mat-toolbar>
   <div class="travelBee">
     <img class="logo" src="../../../assets/images/cloud_logo.png" alt="Illustration Image">
@@ -6,17 +7,35 @@
     <button mat-icon-button class="example-icon favorite-icon">
       <span>Home</span>
     </button>
-    <button  mat-icon-button class="example-icon favorite-icon">
-      <span>Movies</span>
-    </button>
-    <button  mat-icon-button class="example-icon favorite-icon">
-      <span>Series</span>
-    </button>
+<!--    <button  mat-icon-button class="example-icon favorite-icon">-->
+<!--      <span>Movies</span>-->
+<!--    </button>-->
+<!--    <button  mat-icon-button class="example-icon favorite-icon">-->
+<!--      <span>Series</span>-->
+<!--    </button>-->
+    <div class="dropdown">
+      <button class="dropbtn">Genres</button>
+      <div formControlName="genre" class="dropdown-content">
+        <a href="#">Horror</a>
+        <a href="#">Romance</a>
+        <a href="#">Action</a>
+        <a href="#">Comedy</a>
+      </div>
+    </div>
+
+<!--    <mat-form-field>-->
+<!--      <mat-label>Favorite food</mat-label>-->
+<!--      <mat-select>-->
+<!--       <div *ngFor="let genre of genres">-->
+<!--        <mat-option [value]="genre">{{genre}}</mat-option>-->
+<!--       </div>-->
+<!--      </mat-select>-->
+<!--    </mat-form-field>-->
+
   </div>
   <div class="rightSide">
-    <button  mat-icon-button class="example-icon favorite-icon">
-      <mat-icon>person</mat-icon>
-
+    <button  mat-icon-button class="example-icon favorite-icon" (click)="signOut()">
+      <mat-icon>logout</mat-icon>
     </button>
     <button  mat-icon-button class="example-icon favorite-icon">
       <mat-icon>notifications</mat-icon>
@@ -26,9 +45,21 @@
       <mat-form-field appearance="outline">
         <mat-icon matPrefix>search</mat-icon>
         <div>
-          <input matInput placeholder="Search">
+          <input formControlName="movieName" matInput placeholder="Search movies">
         </div>
       </mat-form-field>
     </div>
-  </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <mat-icon matPrefix>search</mat-icon>
+        <div>
+          <input formControlName="actors" matInput placeholder="Search actors">
+        </div>
+      </mat-form-field>
+    </div>
+
+</div>
+
 </mat-toolbar>
+
+</form>

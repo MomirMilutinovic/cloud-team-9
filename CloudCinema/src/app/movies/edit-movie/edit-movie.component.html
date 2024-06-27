@@ -1,0 +1,22 @@
+<form [formGroup]="movieForm">
+
+  <label>Name:</label>
+  <input type="text" formControlName="name" />
+
+  <label>Description:</label>
+  <textarea formControlName="description"></textarea>
+
+  <label>Genres:</label>
+  <input type="text" formControlName="genres" />
+
+  <label>Actors:</label>
+  <input type="text" formControlName="actors" />
+
+  <label>Director:</label>
+  <input type="text" formControlName="director" />
+
+  <label>Year:</label>
+  <input type="number" formControlName="year" />
+
+  <button (click)="onSave()" type="submit">Save</button>
+</form>

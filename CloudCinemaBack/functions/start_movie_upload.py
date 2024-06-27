@@ -17,7 +17,7 @@ sf = boto3.client('stepfunctions')
 
 def start_movie_upload(event, context):
     try:
-        request_body = json.loads(base64.b64decode(event['body']).decode('utf-8'))
+        request_body = json.loads(event['body'])
         name = request_body['name']
         timestamp = int(time.time())
         director = request_body['director']
