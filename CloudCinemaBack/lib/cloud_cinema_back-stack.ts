@@ -53,6 +53,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    const domain = userPool.addDomain('CognitoDomain', {
+      cognitoDomain: {
+        domainPrefix: 'ftn-cloud-cinema-team-9',
+      },
+    });
+
     const standardCognitoAttributes = {
       givenName: true,
       familyName: true,
@@ -94,6 +100,20 @@ export class CloudCinemaBackStack extends cdk.Stack {
         userSrp: true,
         userPassword: true
       },
+      oAuth: {
+        flows: {
+          implicitCodeGrant: true,
+          authorizationCodeGrant: true
+        },
+        callbackUrls: [
+          'https://cloud-cinema-front-bucket.s3.amazonaws.com/index.html',
+          'http://localhost:4200'
+        ],
+        logoutUrls: [
+          'https://cloud-cinema-front-bucket.s3.amazonaws.com/index.html',
+          'http://localhost:4200'
+        ]
+      },
       supportedIdentityProviders: [
         cognito.UserPoolClientIdentityProvider.COGNITO,
       ],
@@ -101,11 +121,18 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeAttributes: clientWriteAttributes,
     });
 
+    const signInUrl = domain.signInUrl(userPoolClient, {
+      redirectUri: 'https://cloud-cinema-front-bucket.s3.amazonaws.com/index.html', // must be a URL configured under 'callbackUrls' with the client
+    });
+
     new cdk.CfnOutput(this, 'userPoolId', {
       value: userPool.userPoolId,
     });
     new cdk.CfnOutput(this, 'userPoolClientId', {
       value: userPoolClient.userPoolClientId,
+    });
+    new cdk.CfnOutput(this, 'signInUrl', {
+      value: signInUrl,
     });
 
     const userAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(this,

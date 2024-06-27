@@ -6,10 +6,11 @@ import {
   HttpInterceptor,
 } from '@angular/common/http';
 import { Observable, from, lastValueFrom } from 'rxjs';
-import { fetchAuthSession } from 'aws-amplify/auth';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class JWTInterceptor implements HttpInterceptor {
+  constructor(private authService: AuthService) {}
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler
@@ -20,14 +21,14 @@ export class JWTInterceptor implements HttpInterceptor {
   }
 
   async handle(req: HttpRequest<any>, next: HttpHandler) {
-    //Preuzeto od: https://stackoverflow.com/questions/77627483/retrieve-raw-accesstoken-and-idtoken-in-aws-amplify-js-v6
-    const { idToken }  = (await fetchAuthSession()).tokens ?? {}
+    let idToken = (await this.authService.getIdToken());
 
     if (req.headers.get('skip')) return lastValueFrom(next.handle(req));
 
+
     if (idToken) {
       const cloned = req.clone({
-        headers: req.headers.set('Authorization', idToken.toString()),
+        headers: req.headers.set('Authorization', idToken),
       });
 
       return lastValueFrom(next.handle(cloned));
