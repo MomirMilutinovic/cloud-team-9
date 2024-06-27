@@ -13,6 +13,7 @@ import {HttpClientModule, HTTP_INTERCEPTORS} from "@angular/common/http";
 import { Amplify } from 'aws-amplify';
 
 import { JWTInterceptor } from './http-interceptors/jwt.interceptor';
+import { AuthModule } from './auth/auth.module';
 
 const onS3 = true;
 const redirectUrl = onS3 ? 'https://cloud-cinema-front-bucket.s3.amazonaws.com/index.html' : 'http://localhost:4200';
@@ -25,13 +26,6 @@ Amplify.configure({
       userPoolId: 'us-east-1_GEFfqsKS2',
       loginWith: {
         email: true,
-        oauth: {
-          domain: 'ftn-cloud-cinema-team-9.auth.us-east-1.amazoncognito.com',
-          scopes: [],
-          redirectSignIn: [redirectUrl],
-          redirectSignOut: [redirectUrl],
-          responseType: 'code',
-        },
       },
     },
   }
@@ -49,6 +43,7 @@ Amplify.configure({
     MaterialModule,
     MoviesModule,
     BrowserAnimationsModule,
+    AuthModule
   ],
   providers: [
     {

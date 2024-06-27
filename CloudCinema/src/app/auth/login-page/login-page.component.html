@@ -1,0 +1,50 @@
+<form *ngIf="!isLoggedIn" [formGroup]="loginForm">
+  <mat-label>Email:</mat-label>
+  <input type="email" matInput formControlName="email" />
+
+  <mat-label>Password:</mat-label>
+  <input type="password" matInput formControlName="password" />
+
+  <button (click)="onLogin()" type="submit">Log in</button>
+</form>
+
+<form *ngIf="!isLoggedIn" [formGroup]="signUpForm">
+  <mat-label>Email:</mat-label>
+  <input type="email" matInput formControlName="email" />
+
+  <mat-label>Password:</mat-label>
+  <input type="password" matInput formControlName="password" />
+
+  <mat-label>Confirm password:</mat-label>
+  <input type="password" matInput formControlName="passwordConfirmation" />
+
+  <mat-label>Given name:</mat-label>
+  <input type="text" matInput formControlName="givenName" />
+
+  <mat-label>Family name:</mat-label>
+  <input type="text" matInput formControlName="familyName" />
+
+  <button (click)="onSignup()" type="submit">Sign up</button>
+</form>
+
+<form *ngIf="needsVerification" [formGroup]="verficationForm">
+  <p>
+    We have sent a verification code to your email address. Please enter it
+    here.
+  </p>
+  <mat-label>Verification code:</mat-label>
+  <input type="text" matInput formControlName="code" />
+
+  <button (click)="onVerify()" type="submit">Verify email</button>
+</form>
+
+<form *ngIf="needsPasswordChange" [formGroup]="changePasswordForm">
+  <p>Please change your password.</p>
+  <mat-label>New password:</mat-label>
+  <input type="password" matInput formControlName="password" />
+
+  <mat-label>Confirm password:</mat-label>
+  <input type="password" matInput formControlName="passwordConfirmation" />
+
+  <button (click)="onChangePassword()" type="submit">Change password</button>
+</form>
