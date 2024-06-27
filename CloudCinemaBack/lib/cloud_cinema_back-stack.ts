@@ -77,22 +77,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
     movie_info_table.grantWriteData(startMovieUpload);
 
 
-    // movie_info_table.addGlobalSecondaryIndex({
-    //   indexName: 'NameIndex',
-    //   partitionKey: { name: 'name', type: dynamodb.AttributeType.STRING },
+    // movie_serch_table.addGlobalSecondaryIndex({
+    //   indexName: 'SearchIndex',
+    //   partitionKey: { name: 'attributes', type: dynamodb.AttributeType.STRING },
     //   projectionType: dynamodb.ProjectionType.ALL,
-    // });
-
-    // movie_info_table.addGlobalSecondaryIndex({
-    //   indexName: 'GenreIndex',
-    //   partitionKey: { name: 'genre', type: dynamodb.AttributeType.STRING },
-    //   projectionType: dynamodb.ProjectionType.ALL,
-    // });
-   
-    // movie_info_table.addGlobalSecondaryIndex({
-    //   indexName: 'ActorsIndex',
-    //   partitionKey: { name: 'actors', type: dynamodb.AttributeType.STRING },
-    //   projectionType: dynamodb.ProjectionType.ALL, 
     // });
 
     const searchMovies = new lambda.Function(this, 'SearchMoviesFunction', {
@@ -104,6 +92,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     searchMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(searchMovies);
+
+    // searchMovies.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
+    // movie_info_table.grantReadData(searchMovies);
 
     const api = new apigateway.RestApi(this, 'GetMovieApi', {
       restApiName: 'Get Movie Service',
