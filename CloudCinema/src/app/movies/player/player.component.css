@@ -1,0 +1,15 @@
+#my-video {
+    margin-top: 200px;
+}
+
+main {
+    padding: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+main video {
+    width: 100%;
+}
