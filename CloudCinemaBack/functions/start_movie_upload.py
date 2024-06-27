@@ -9,6 +9,7 @@ import base64
 
 bucket_name = os.environ['BUCKET_NAME']
 table_name = os.environ['TABLE_NAME']
+search_table_name=os.environ['SEARCH_TABLE_NAME']
 state_machine_arn = os.environ['STATE_MACHINE_ARN']
 dynamodb = boto3.resource('dynamodb')
 s3 = boto3.client('s3')
@@ -34,6 +35,14 @@ def start_movie_upload(event, context):
                 'year': year,
                 'timestamp': timestamp,
                 'pending': True
+            }
+        )
+        attributes=name+","+director+",".join(actors)
+        search_table = dynamodb.Table(search_table_name)
+        search_response = search_table.put_item(
+            Item={
+                'id': str(id),
+                'attributes': attributes
             }
         )
 
