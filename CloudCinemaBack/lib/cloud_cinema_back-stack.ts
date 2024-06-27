@@ -220,7 +220,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const movieDeleteStepFunction = new MovieDeleteStepFunction(this, 'MovieDeleteStepFunction', {
       movieSourceBucket: bucket,
-      movieTable: movie_info_table
+      movieTable: movie_info_table,
+      movieOutputBucket: ouptutBucket
     });
 
     const getMovie = new lambda.Function(this, 'GetMovieFunction', {

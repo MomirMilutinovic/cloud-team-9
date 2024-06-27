@@ -11,7 +11,8 @@ import { Duration } from 'aws-cdk-lib';
 
 export interface MovieDeleteStepFunctionProps {
     movieSourceBucket: s3.Bucket,
-    movieTable: Table
+    movieTable: Table,
+    movieOutputBucket: s3.Bucket
 }
 
 export class MovieDeleteStepFunction extends Construct {
@@ -25,6 +26,7 @@ export class MovieDeleteStepFunction extends Construct {
         super(scope, id);
         const movieTable = props.movieTable;
         const movieSourceBucket = props.movieSourceBucket;            
+        const movieOutputBucket = props.movieOutputBucket;
 
         // Define Lambdas
         this.deleteMovieFromS3 = new lambda.Function(this, 'DeleteMovieFromS3Function', {
@@ -51,7 +53,9 @@ export class MovieDeleteStepFunction extends Construct {
 
         // Grant permissions to lambdas
         movieSourceBucket.grantDelete(this.deleteMovieFromS3);
+        movieOutputBucket.grantReadWrite(this.deleteMovieFromS3);
         this.deleteMovieFromS3.addEnvironment('BUCKET_NAME', movieSourceBucket.bucketName);
+        this.deleteMovieFromS3.addEnvironment('OUTPUT_BUCKET_NAME', movieOutputBucket.bucketName);
 
         movieTable.grantFullAccess(this.deleteMovieFromDynamoDB)
         movieTable.grantFullAccess(this.rollbackChanges)

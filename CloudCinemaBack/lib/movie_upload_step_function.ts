@@ -130,7 +130,9 @@ export class MovieUploadStepFunction extends Construct {
         sendMovieUploadTaskResult.addEnvironment('TABLE_NAME', task_token_table.tableName);
 
         movieSourceBucket.grantReadWrite(deleteMovieFromS3);
+        movieOutputBucket.grantReadWrite(deleteMovieFromS3);
         deleteMovieFromS3.addEnvironment('BUCKET_NAME', movieSourceBucket.bucketName);
+        deleteMovieFromS3.addEnvironment('OUTPUT_BUCKET_NAME', movieOutputBucket.bucketName);
 
         movieSourceBucket.grantRead(transcodeMovie);
         movieOutputBucket.grantWrite(transcodeMovie);
