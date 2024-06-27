@@ -24,7 +24,7 @@ def delete_one(event, context):
             'statusCode': 200,
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com'
+                'Access-Control-Allow-Origin':'*'
             },
         }
 

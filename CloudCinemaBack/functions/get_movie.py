@@ -19,7 +19,7 @@ def get_one(event, context):
         return {
             'statusCode': 302,
             'headers': {
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com',
+                'Access-Control-Allow-Origin':'*',
                 'Location': presigned_url,
             },
         }

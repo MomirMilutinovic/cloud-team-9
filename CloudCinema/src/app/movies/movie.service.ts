@@ -16,9 +16,10 @@ export class MovieService {
     const url = environment.apiHost + 'movies_info';
     return this.httpClient.get<any[]>(url)
     .pipe(map(response => {
-        return response.length > 0 ? response.map(({ id, name, actors, director, year,timestamp }) => ({
+        return response.length > 0 ? response.map(({ id, name, genres, actors, director, year, timestamp }) => ({
           id: id.S,
           name: name.S,
+          genres: genres?.L.map((genre: { S: string }) => genre.S) || [],
           actors: actors?.L.map((actor: { S: string }) => actor.S) || [],
           director: director.S,
           year: year ? parseInt(year.N, 10) : undefined,
@@ -47,27 +48,17 @@ export class MovieService {
   }
 
   editMovie(movieInfo: MovieInfo): Observable<any> {
-    const info: MovieInfo = {
-        id:"dc43e0c7-e06c-4c11-be18-254d346ce9d5",
-        name:"Mission Impossible 999",
-        description:"",
-        director:"Christopher McQuarrie",
-        genres:["Action"],
-        actors:["Tom Cruise", "Henry Cavill", "Ving Rhames"],
-        year:2023,
-        timestamp:1719182372
-    }
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
       'Access-Control-Allow-Methods': 'OPTIONS,GET,POST,PUT,DELETE'
     });
     const url = environment.apiHost + 'movie_info';
-    return this.httpClient.put<any>(url,  info, {headers})
+    return this.httpClient.put<any>(url,  movieInfo, {headers})
   }
 
   deleteMovie(id: string, timestamp: number) {
-    const url = environment.apiHost + 'movies/' + id;
+    const url = environment.apiHost + 'movies';
     let params = new HttpParams();
     params = params.append('movie_id', id);
     params = params.append('timestamp', timestamp);

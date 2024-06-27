@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,4 +13,12 @@ export class NavbarComponent {
     "Horror",
     "Romance"
   ];
+
+  constructor(private authService: AuthService) {
+
+  }
+  signOut() {
+    this.authService.signOut();
+  }
+
 }

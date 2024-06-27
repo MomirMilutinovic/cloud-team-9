@@ -34,7 +34,7 @@ def start_delete_movie(event, context):
             'statusCode': 201,
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com',
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
             }
