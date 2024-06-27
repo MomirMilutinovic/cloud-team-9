@@ -10,6 +10,7 @@ import { MovieUploadStepFunction } from './movie_upload_step_function';
 import { MovieDeleteStepFunction } from './movie_delete_step_function';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 
 
@@ -172,6 +173,25 @@ export class CloudCinemaBackStack extends cdk.Stack {
       allowedHeaders: ['*']
     }); 
 
+    const ouptutBucket = new s3.Bucket(this, 'CloudCinemaMoviesTranscodedBucket', {
+      bucketName: 'cloud-cinema-movies-transcoded-bucket-us', 
+      versioned: true, 
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      publicReadAccess: true,
+      blockPublicAccess: {
+        blockPublicAcls: false,
+        blockPublicPolicy: false,
+        ignorePublicAcls: false,
+        restrictPublicBuckets: false,
+      },
+    });
+    ouptutBucket.addCorsRule({
+      allowedOrigins: ['*'],
+      allowedMethods: [s3.HttpMethods.GET],
+      allowedHeaders: ['*']
+    });
+
 
     const movie_info_table = new dynamodb.Table(this, 'CloudCinemaMovieInfoTable', {
       tableName: 'cloud-cinema-movie-info', 
@@ -190,9 +210,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1
     });  
 
+
+
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
-      movieTable: movie_info_table
+      movieTable: movie_info_table,
+      movieOutputBucket: ouptutBucket
     });
 
     const movieDeleteStepFunction = new MovieDeleteStepFunction(this, 'MovieDeleteStepFunction', {

@@ -5,13 +5,16 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import path = require('path');
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export interface MovieUploadStepFunctionProps {
     movieSourceBucket: s3.Bucket,
-    movieTable: Table
+    movieTable: Table,
+    movieOutputBucket: s3.Bucket
 }
 
 export class MovieUploadStepFunction extends Construct {
@@ -24,6 +27,7 @@ export class MovieUploadStepFunction extends Construct {
         super(scope, id);
         const movieTable = props.movieTable;
         const movieSourceBucket = props.movieSourceBucket;
+        const movieOutputBucket = props.movieOutputBucket;
 
         const task_token_table = new dynamodb.Table(this, 'MovieUploadTaskTokenTable', {
             tableName: 'movie-upload-task-token-table', 
@@ -32,6 +36,20 @@ export class MovieUploadStepFunction extends Construct {
             readCapacity:1,            //u grupi pise da treba da se stave read i write na 1 da ne bi naplacivao
             writeCapacity:1
         });               
+
+
+        const deadLetterQueue = new sqs.Queue(this, 'dead-letter-queue', {
+            retentionPeriod: cdk.Duration.minutes(30)
+        });
+        const transcodingQueue = new sqs.Queue(this, 'transcoding-queue', {
+            visibilityTimeout: cdk.Duration.minutes(5),
+            retentionPeriod: cdk.Duration.minutes(30),
+            deadLetterQueue: {
+                maxReceiveCount: 3,
+                queue: deadLetterQueue
+            }
+        });
+
 
         // Define Lambdas
         this.isMovieUploaded = new lambda.Function(this, 'IsMovieUploadedFunction', {
@@ -52,12 +70,45 @@ export class MovieUploadStepFunction extends Construct {
             code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
             timeout: cdk.Duration.seconds(30)
         });
-
         const sendMovieUploadTaskResult = new lambda.Function(this, 'SendMovieUploadTaskResultFunction', {
             runtime: lambda.Runtime.PYTHON_3_9,
             handler: 'send_movie_upload_task_result.send_movie_upload_task_result', 
             code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
             timeout: cdk.Duration.seconds(30)
+        });
+        const deleteMovieFromS3 = new lambda.Function(this, 'DeleteMovieFromS3CatchFunction', {
+            runtime: lambda.Runtime.PYTHON_3_9,
+            handler: 'delete_movie_from_s3.delete_one', 
+            code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+            timeout: cdk.Duration.seconds(30)
+        });
+        const sendTranscodeFailTaskResult = new lambda.Function(this, 'SendTranscodeFailTaskResultFunction', {
+            runtime: lambda.Runtime.PYTHON_3_9,
+            handler: 'send_transcode_fail_task_result.send_transcode_fail_task_result',
+            code: lambda.Code.fromAsset(path.join(__dirname, '../functions')),
+            timeout: cdk.Duration.seconds(30)
+        });
+
+
+        const ffmegLayer = new lambda.LayerVersion(this, 'ffmpeg-layer', {
+            layerVersionName: 'ffmpeg',
+            compatibleRuntimes: [lambda.Runtime.PYTHON_3_8],
+            code: lambda.AssetCode.fromAsset('layers/ffmpeg')
+          });
+        const transcodeMovie = new lambda.Function(this, 'TranscodeMovieFunction', {
+            runtime: lambda.Runtime.PYTHON_3_8, // python-ffmpeg-video-streaming does not work on python versions newer than 3.8
+            handler: 'transcode.transcode',
+            code: lambda.Code.fromAsset(path.join(__dirname, '../functions'),{
+                bundling: {
+                    image: lambda.Runtime.PYTHON_3_8.bundlingImage,
+                    command: [
+                        'bash', '-c', 'pip install --no-cache python-ffmpeg-video-streaming gevent -t /asset-output && cp -au . /asset-output'
+                    ]
+                }
+            }),
+            timeout: cdk.Duration.minutes(2),
+            layers: [ffmegLayer],
+            memorySize: 1024 + 512
         });
 
 
@@ -77,6 +128,22 @@ export class MovieUploadStepFunction extends Construct {
 
         sendMovieUploadTaskResult.addEnvironment('BUCKET_NAME', movieSourceBucket.bucketName)
         sendMovieUploadTaskResult.addEnvironment('TABLE_NAME', task_token_table.tableName);
+
+        movieSourceBucket.grantReadWrite(deleteMovieFromS3);
+        deleteMovieFromS3.addEnvironment('BUCKET_NAME', movieSourceBucket.bucketName);
+
+        movieSourceBucket.grantRead(transcodeMovie);
+        movieOutputBucket.grantWrite(transcodeMovie);
+        transcodeMovie.addEnvironment('INPUT_BUCKET', movieSourceBucket.bucketName)
+        transcodeMovie.addEnvironment('OUTPUT_BUCKET', movieOutputBucket.bucketName)
+
+        // Hook up lambdas for transcoding to sqs queues
+        transcodeMovie.addEventSource(new SqsEventSource(transcodingQueue, {
+            batchSize: 1
+        }));
+        sendTranscodeFailTaskResult.addEventSource(new SqsEventSource(deadLetterQueue, {
+            batchSize: 1
+        }));
 
 
         // Define step function
@@ -100,6 +167,36 @@ export class MovieUploadStepFunction extends Construct {
             resultPath: "$.movieDetails"
         });
 
+        const enqueueTranscodeTask = new tasks.SqsSendMessage(this,
+            'EnqueueTranscodeTask',
+            {
+                queue: transcodingQueue,
+                messageBody: sfn.TaskInput.fromObject({
+                    'movieDetails.$': '$',
+                    taskToken: sfn.JsonPath.taskToken 
+                }),
+                integrationPattern: sfn.IntegrationPattern.WAIT_FOR_TASK_TOKEN,
+                resultPath: '$.transcodeTask',
+                taskTimeout: sfn.Timeout.duration(cdk.Duration.minutes(10))
+            },
+        );
+        const deleteFromS3Catch = new tasks.LambdaInvoke(this, 'DeleteFromS3Catch', {
+            lambdaFunction: deleteMovieFromS3,
+            payload: sfn.TaskInput.fromObject({
+                'movieDetails.$': '$',
+            }),
+            taskTimeout: sfn.Timeout.duration(cdk.Duration.minutes(1)),
+            resultPath: '$.taskResult'
+        });
+        deleteFromS3Catch.next(cleanUpFailedUploadTask);
+        definition.next(
+            enqueueTranscodeTask
+        );
+        enqueueTranscodeTask.addCatch(deleteFromS3Catch, {
+            errors: ['States.ALL'],
+            resultPath: "$.catchResult"
+        })
+
         const markMovieAsUploadedTask = new tasks.LambdaInvoke(this, 'MarkMovieAsUploadedTask', {
             lambdaFunction: this.markMovieAsUploaded,
             payload: sfn.TaskInput.fromObject({
@@ -107,7 +204,7 @@ export class MovieUploadStepFunction extends Construct {
             }),
             resultPath: '$.taskResult'
         });
-        definition.next(
+        enqueueTranscodeTask.next(
             markMovieAsUploadedTask
         );
 
@@ -116,6 +213,8 @@ export class MovieUploadStepFunction extends Construct {
         });
         movieSourceBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new LambdaDestination(sendMovieUploadTaskResult));
         this.stateMachine.grantTaskResponse(sendMovieUploadTaskResult);
+        this.stateMachine.grantTaskResponse(sendTranscodeFailTaskResult);
+        this.stateMachine.grantTaskResponse(transcodeMovie);
         task_token_table.grantReadWriteData(sendMovieUploadTaskResult)
     }
 }
