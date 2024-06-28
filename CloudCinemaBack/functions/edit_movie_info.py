@@ -84,15 +84,3 @@ def edit_one(event, context):
             }
         }
     
-
-
-def edit_one3(event, context):
-    return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'https://cloud-cinema-front-bucket.s3.amazonaws.com',
-                'Access-Control-Allow-Methods': 'PUT,OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
-            }
-        }

@@ -9,6 +9,8 @@ import base64
 
 state_machine_arn = os.environ['STATE_MACHINE_ARN']
 step_function = boto3.client('stepfunctions')
+table_name = os.environ['TABLE_NAME']
+dynamodb = boto3.resource('dynamodb')
 
 
 def start_delete_movie(event, context):
@@ -20,14 +22,27 @@ def start_delete_movie(event, context):
         # id = request_body['id']
         # timestamp = request_body['timestamp']
 
+        movie_table = dynamodb.Table(table_name)
+
+        response = movie_table.get_item(Key={
+            'id': id,
+            'timestamp':int(timestamp)
+        })
+
+        item = response['Item']
+
         step_function_input = {
             'id': str(id),
-            'timestamp': timestamp
+            'name': item.get('name'),
+            'director': item.get('director'),
+            'actors': item.get('actors'),
+            'year': item.get('year'),
+            'timestamp': int(timestamp),
         }
 
         step_function.start_execution(
             stateMachineArn = state_machine_arn,
-            input = json.dumps(step_function_input)
+            input = json.dumps(step_function_input, default=str)
         )
 
         return {
