@@ -45,6 +45,10 @@ export class MovieCardComponent implements OnInit {
     );
   }
 
+  play(movieId: string | undefined) {
+    this.router.navigate(["/play", movieId]);
+  }
+
   edit(id: string | undefined, timestamp: number | undefined) {
     // this.router.navigate(["/movies/movieEdit", id, timestamp]);
   }

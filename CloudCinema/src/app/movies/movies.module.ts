@@ -5,13 +5,15 @@ import {MatIconModule} from "@angular/material/icon";
 import { EditMovieComponent } from './edit-movie/edit-movie.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import {RouterLink} from "@angular/router";
+import { PlayerComponent } from './player/player.component';
 
 
 
 @NgModule({
   declarations: [
     MovieCardComponent,
-    EditMovieComponent
+    EditMovieComponent,
+    PlayerComponent
   ],
   exports: [
     MovieCardComponent
