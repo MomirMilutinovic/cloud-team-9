@@ -37,13 +37,14 @@ def start_movie_upload(event, context):
                 'pending': True
             }
         )
-        attributes=name+","+director+",".join(actors)
+        attributes=name+","+",".join(actors)+","+director   #namestiti da ide kao na frontu  name+","+actors+","+director+","+genres
         search_table = dynamodb.Table(search_table_name)
         search_response = search_table.put_item(
             Item={
                 'id': str(id),
-                'attributes': attributes
-            }
+                'attributes': attributes,
+                'timestamp':timestamp
+                }
         )
 
         presigned_url = s3.generate_presigned_url('put_object', Params={

@@ -205,6 +205,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const movie_search_table = new dynamodb.Table(this, 'CloudCinemaMovieSearchTable', {
       tableName: 'cloud-cinema-movie-search', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
       writeCapacity:1
@@ -277,7 +278,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
     movie_info_table.grantReadData(searchMovies);
 
     searchMovies.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
-    movie_info_table.grantReadData(searchMovies);
+    movie_search_table.grantReadData(searchMovies);
+
+    searchMovies.addEnvironment("INDEX_NAME","SearchIndex")
 
 
     const startMovieDelete = new lambda.Function(this, 'StartMovieDeleteFunction', {
@@ -380,7 +383,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const moviesSearch = moviesBase.addResource('search');
     const searchMovieIntegration = new apigateway.LambdaIntegration(searchMovies);
-    moviesSearch.addMethod('GET', searchMovieIntegration);
+    moviesSearch.addMethod('GET', searchMovieIntegration,{
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
 
 
   }

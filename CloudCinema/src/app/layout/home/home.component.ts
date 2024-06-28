@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {MovieInfo} from "../../movies/models/models.module";
 import {getDownlevelDecoratorsTransform} from "@angular/compiler-cli/src/transformers/downlevel_decorators_transform";
 
@@ -16,6 +16,10 @@ export class HomeComponent implements OnInit{
   ngOnInit(): void {
     this.movieService.getAll().subscribe(value => {
       this.movies=value;
+      this.movieService.setMovies(this.movies);
+      this.movieService.getMovies().subscribe(movies => {
+        this.movies = movies;
+      });
     },error => {
       console.error('Error fetching movies:', error);
     });

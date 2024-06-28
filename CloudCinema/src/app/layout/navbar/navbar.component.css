@@ -11,43 +11,26 @@ mat-toolbar {
 }
 
 .leftSide {
-  width: 50%;
+  width: 30%;
   /*display: flex;*/
-  justify-content: left;
+  justify-content: center;
   /*padding-bottom: 10px;*/
 }
 
 .rightSide {
-  width: 50%;
+  width: 70%;
   display: flex;
   justify-content: right;
   padding-top: 10px;
 }
-
-span{
-  margin-right: 100px;
-}
-
-.leftSide button {
-  margin-left: 30px;
-  width: 70px;
-  font-size: 20px;
-}
-
-.rightSide button {
-  width: 50px;
-  /*margin-top: 25px;*/
-
-}
-
-
 .search-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 60px;
   padding-top: 3px;
-  margin-right: 10px;
+  width: 200px;
+  margin-right: 0px;
 }
 
 .example-full-width {
@@ -96,6 +79,12 @@ span{
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
   display: block;
+}
+
+button{
+  background-color: rgba(206, 201, 201, 0);
+  cursor: pointer;
+  border: none;
 }
 
 
