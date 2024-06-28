@@ -263,6 +263,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30)
     });
 
+    startMovieDelete.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    movie_info_table.grantReadData(startMovieDelete);
+
+
     const editMovieInfo = new lambda.Function(this, 'EditMovieInfoFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'edit_movie_info.edit_one', 

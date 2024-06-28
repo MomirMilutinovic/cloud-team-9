@@ -18,6 +18,8 @@ export class MovieDeleteStepFunction extends Construct {
     public readonly stateMachine: sfn.StateMachine;
     public readonly deleteMovieFromS3: lambda.Function;
     public readonly deleteMovieFromDynamoDB: lambda.Function;
+    public readonly rollbackChanges: lambda.Function;
+
 
     constructor(scope: Construct, id: string, props: MovieDeleteStepFunctionProps) {
         super(scope, id);
@@ -32,21 +34,47 @@ export class MovieDeleteStepFunction extends Construct {
             timeout: cdk.Duration.seconds(30)
         });
 
+        this.rollbackChanges = new lambda.Function(this, 'RollbackChanges', {
+            runtime: lambda.Runtime.PYTHON_3_9,
+            handler: 'clean_up_failed_dynamo_delete.clean_up',
+            code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+            timeout: cdk.Duration.seconds(30)
+        });
+
         this.deleteMovieFromDynamoDB = new lambda.Function(this, 'DeleteMovieFromDynamoDBFunction', {
             runtime: lambda.Runtime.PYTHON_3_9,
             handler: 'delete_movie_from_dynamodb.delete_one', 
             code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
             timeout: cdk.Duration.seconds(30)
         });
+        
 
         // Grant permissions to lambdas
         movieSourceBucket.grantDelete(this.deleteMovieFromS3);
         this.deleteMovieFromS3.addEnvironment('BUCKET_NAME', movieSourceBucket.bucketName);
 
         movieTable.grantFullAccess(this.deleteMovieFromDynamoDB)
+        movieTable.grantFullAccess(this.rollbackChanges)
         this.deleteMovieFromDynamoDB.addEnvironment('MOVIE_TABLE_NAME', movieTable.tableName);
+        this.rollbackChanges.addEnvironment('MOVIE_TABLE_NAME', movieTable.tableName);
+
 
         // define tasks
+        const deleteFromDynamo = new tasks.LambdaInvoke(this, 'Delete from Dynamo', {
+            lambdaFunction: this.deleteMovieFromDynamoDB,
+            payload: sfn.TaskInput.fromObject({
+                'movieDetails.$': '$',
+            }),
+            taskTimeout: sfn.Timeout.duration(cdk.Duration.minutes(1)),
+            resultPath: '$.movieDetails'
+        })
+        deleteFromDynamo.addRetry({
+            maxAttempts: 1,
+            interval: cdk.Duration.seconds(1),
+            errors: ['Lambda.ServiceException', 'Lambda.AWSLambdaException', 'Lambda.SdkClientException', 'Lambda.TooManyRequestsException', 'Lambda.InvalidRequestContentException'],
+        });
+
+
         const deleteFromS3 = new tasks.LambdaInvoke(this, 'Delete from S3', {
             lambdaFunction: this.deleteMovieFromS3,
             payload: sfn.TaskInput.fromObject({
@@ -54,48 +82,26 @@ export class MovieDeleteStepFunction extends Construct {
             }),
             taskTimeout: sfn.Timeout.duration(cdk.Duration.minutes(1)),
             resultPath: '$.movieDetails'
-          });
-        // deleteFromS3.addRetry({
-        // maxAttempts: 1,
-        // interval: cdk.Duration.seconds(1),
-        // backoffRate: 2,
-        // errors: ['Lambda.ServiceException', 'Lambda.AWSLambdaException', 'Lambda.SdkClientException'],
-        // });
-      
-        const deleteFromDynamo = new tasks.LambdaInvoke(this, 'Delete from Dynamo', {
-            lambdaFunction: this.deleteMovieFromDynamoDB,
+        });
+        deleteFromS3.addRetry({
+        maxAttempts: 1,
+        interval: cdk.Duration.seconds(1),
+        errors: ['Lambda.ServiceException', 'Lambda.AWSLambdaException', 'Lambda.SdkClientException', 'Lambda.InvalidRequestContentException'],
+        });
+
+        const rollback = new tasks.LambdaInvoke(this, 'Rollback', {
+            lambdaFunction: this.rollbackChanges,
             payload: sfn.TaskInput.fromObject({
                 'movieDetails.$': '$',
             }),
-            taskTimeout: sfn.Timeout.duration(cdk.Duration.minutes(1)),
-            // resultPath: '$.movieDetails'
-        })
-        // deleteFromDynamo.addRetry({
-        //     maxAttempts: 1,
-        //     interval: cdk.Duration.seconds(1),
-        //     backoffRate: 2,
-        //     errors: ['Lambda.ServiceException', 'Lambda.AWSLambdaException', 'Lambda.SdkClientException'],
-        //   });
-
-        // const jobFailed = new sfn.Fail(this, 'Job Failed', {
-        //     cause: 'AWS Batch Job Failed',
-        //     error: 'DescribeJob returned FAILED',
-        //   });
-          
-        // const jobSucceeded = new sfn.Succeed(this, 'Job Succeeded');
-
-        // const rollbackDeleteFromS3Task = new tasks.LambdaInvoke(this, 'RollbackDeleteFromS3Task', {
-        //     lambdaFunction: this.deleteMovieFromS3,
-        // });
-      
-        // const rollbackDeleteFromDynamoTask = new tasks.LambdaInvoke(this, 'RollbackDeleteFromDynamoTask', {
-        //     lambdaFunction: this.deleteMovieFromDynamoDB,
-        // });
-
+        });
 
         // Define step function
-        const definition = deleteFromS3
-            .next(deleteFromDynamo)
+        const definition = deleteFromDynamo
+            .next(deleteFromS3.addCatch(rollback,  {
+                errors: ['States.ALL'],
+                resultPath: '$.error-info',
+            }))
             // .next(new sfn.Choice(this, 'Job Complete?')
             //     // Look at the "status" field
             //     .when(sfn.Condition.stringEquals('$.status', 'FAILED'), jobFailed)
