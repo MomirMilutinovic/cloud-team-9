@@ -102,7 +102,7 @@ export class MovieUploadStepFunction extends Construct {
                 bundling: {
                     image: lambda.Runtime.PYTHON_3_8.bundlingImage,
                     command: [
-                        'bash', '-c', 'pip install --no-cache python-ffmpeg-video-streaming gevent -t /asset-output && cp -au . /asset-output'
+                        'bash', '-c', 'pip install --no-cache python-ffmpeg-video-streaming gevent -t /asset-output && rsync -r . /asset-output'
                     ]
                 }
             }),

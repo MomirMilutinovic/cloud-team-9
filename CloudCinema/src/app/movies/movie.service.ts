@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {MovieInfo} from "./models/models.module";
+import {SubscriptionInfo} from "./models/models.module";
 import {catchError, map, Observable, of} from "rxjs";
 import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../env/env";
@@ -45,6 +46,11 @@ export class MovieService {
   getMovie(id: string): Observable<HttpResponse<any>>  {
     const url = environment.apiHost + 'movies/download/'+id;
     return this.httpClient.get<any>(url, {responseType: 'blob' as 'json', observe: 'response' });
+  }
+
+  subscribeSNS(subscription: SubscriptionInfo): Observable<HttpResponse<any>>  {
+    const url = environment.apiHost + 'subscribe';
+    return this.httpClient.post<any>(url, subscription);
   }
 
   editMovie(movieInfo: MovieInfo): Observable<any> {

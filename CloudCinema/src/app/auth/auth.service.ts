@@ -34,6 +34,7 @@ export class AuthService {
             password: password,
         });
         if (nextStep.signInStep == "DONE") {
+            localStorage.setItem('userEmail', email);
             this.router.navigate(['/home']);
         }
 

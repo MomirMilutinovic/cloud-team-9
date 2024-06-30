@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MovieInfo} from "../../movies/models/models.module";
+import {SubscriptionInfo} from "../../movies/models/models.module";
 import {getDownlevelDecoratorsTransform} from "@angular/compiler-cli/src/transformers/downlevel_decorators_transform";
-
 import {MovieService} from "../../movies/movie.service";
 
 @Component({
@@ -53,4 +53,18 @@ export class HomeComponent implements OnInit{
   }
 
 
+  subscribe():void {
+    const subscribeInfo : SubscriptionInfo = {
+      email:'travelbee.team22@gmail.com',
+      actors:[],
+      director:'Sonja',
+      genres:[]
+    }
+
+    this.movieService.subscribeSNS(subscribeInfo).subscribe(value => {
+      console.log("success!")
+    },error => {
+      console.error('Error sns:', error);
+    });
+  }
 }

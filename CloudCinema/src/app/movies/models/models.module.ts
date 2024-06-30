@@ -8,3 +8,10 @@ export interface MovieInfo{
   year?:number;
   timestamp?:number;
 }
+
+export interface SubscriptionInfo{
+  email: string;
+  actors: string[];
+  director: string;
+  genres: string[];
+}

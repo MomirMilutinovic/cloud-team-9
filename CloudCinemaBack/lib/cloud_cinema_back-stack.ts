@@ -11,9 +11,10 @@ import { MovieDeleteStepFunction } from './movie_delete_step_function';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-
-
-
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 export class CloudCinemaBackStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -199,18 +200,18 @@ export class CloudCinemaBackStack extends cdk.Stack {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
-      writeCapacity:1
+      writeCapacity:1,
+      stream:dynamodb.StreamViewType.NEW_IMAGE
     }); 
     
     const movie_search_table = new dynamodb.Table(this, 'CloudCinemaMovieSearchTable', {
       tableName: 'cloud-cinema-movie-search', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      readCapacity:1,           
+      readCapacity:1,
       writeCapacity:1
-    });  
-
-
+    });
 
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
@@ -383,5 +384,54 @@ export class CloudCinemaBackStack extends cdk.Stack {
     moviesSearch.addMethod('GET', searchMovieIntegration);
 
 
+    const movieTopic = new sns.Topic(this, 'MovieTopic', {
+      displayName: 'SNS topic for movie notification'
+    });
+
+    // movieTopic.addSubscription(new subscriptions.EmailSubscription('travelbee.team22@gmail.com'));
+
+    const publish = new lambda.Function(this, 'Publish', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      handler: 'notifications.publish',
+    });
+
+    const subscribe = new lambda.Function(this, 'Subscribe', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      handler: 'notifications.subscribe',
+    });
+
+    publish.addEnvironment("SNS_ARN", movieTopic.topicArn)
+    subscribe.addEnvironment("SNS_ARN", movieTopic.topicArn)
+
+    movieTopic.grantPublish(publish)
+
+    movieTopic.addToResourcePolicy(new iam.PolicyStatement({
+      actions: ['sns:Subscribe','sns:ListSubscriptionsByTopic'],
+      resources: [movieTopic.topicArn],
+      principals: [new iam.ServicePrincipal('lambda.amazonaws.com')],
+      effect: iam.Effect.ALLOW,
+    }));
+
+    subscribe.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:Subscribe', 'sns:ListSubscriptionsByTopic'],
+      resources: [movieTopic.topicArn],
+      effect: iam.Effect.ALLOW,
+    }));
+
+    const snsBase = api.root.addResource('subscribe')
+
+    const subscribeInfoIntegration = new apigateway.LambdaIntegration(subscribe);
+    snsBase.addMethod('POST', subscribeInfoIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    publish.addEventSource(new DynamoEventSource(movie_info_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
   }
 }

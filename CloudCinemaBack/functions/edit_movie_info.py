@@ -1,7 +1,5 @@
 import traceback
 import json
-import uuid
-import time
 import os
 import boto3
 import base64
