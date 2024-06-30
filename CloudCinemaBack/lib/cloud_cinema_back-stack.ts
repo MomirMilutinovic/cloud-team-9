@@ -384,9 +384,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
     moviesSearch.addMethod('GET', searchMovieIntegration);
 
 
-    const movieTopic = new sns.Topic(this, 'MovieTopic', {
-      displayName: 'SNS topic for movie notification'
-    });
+    // const movieTopic = new sns.Topic(this, 'MovieTopic', {
+    //   displayName: 'SNS topic for movie notification'
+    // });
 
     // movieTopic.addSubscription(new subscriptions.EmailSubscription('travelbee.team22@gmail.com'));
 
@@ -402,23 +402,29 @@ export class CloudCinemaBackStack extends cdk.Stack {
       handler: 'notifications.subscribe',
     });
 
-    publish.addEnvironment("SNS_ARN", movieTopic.topicArn)
-    subscribe.addEnvironment("SNS_ARN", movieTopic.topicArn)
+    // publish.addEnvironment("SNS_ARN", movieTopic.topicArn)
+    // subscribe.addEnvironment("SNS_ARN", movieTopic.topicArn)
 
-    movieTopic.grantPublish(publish)
+    // movieTopic.grantPublish(publish)
 
-    movieTopic.addToResourcePolicy(new iam.PolicyStatement({
-      actions: ['sns:Subscribe','sns:ListSubscriptionsByTopic'],
-      resources: [movieTopic.topicArn],
-      principals: [new iam.ServicePrincipal('lambda.amazonaws.com')],
-      effect: iam.Effect.ALLOW,
-    }));
+    // movieTopic.addToResourcePolicy(new iam.PolicyStatement({
+    //   actions: ['sns:Subscribe','sns:ListSubscriptionsByTopic'],
+    //   resources: [movieTopic.topicArn],
+    //   principals: [new iam.ServicePrincipal('lambda.amazonaws.com')],
+    //   effect: iam.Effect.ALLOW,
+    // }));
 
     subscribe.addToRolePolicy(new iam.PolicyStatement({
-      actions: ['sns:Subscribe', 'sns:ListSubscriptionsByTopic'],
-      resources: [movieTopic.topicArn],
+      actions: ['sns:Subscribe', 'sns:ListTopics','sns:CreateTopic','sns:ListSubscriptionsByTopic','sns:ListSubscriptions'],
+      resources: ['*'],
       effect: iam.Effect.ALLOW,
     }));
+    publish.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:Publish', 'sns:ListTopics','sns:CreateTopic','sns:ListSubscriptionsByTopic','sns:ListSubscriptions'],
+      resources: ['*'],
+      effect: iam.Effect.ALLOW
+    }));
+
 
     const snsBase = api.root.addResource('subscribe')
 
