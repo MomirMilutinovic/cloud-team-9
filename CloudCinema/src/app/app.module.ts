@@ -14,6 +14,7 @@ import { Amplify } from 'aws-amplify';
 
 import { JWTInterceptor } from './http-interceptors/jwt.interceptor';
 import { AuthModule } from './auth/auth.module';
+import {MovieSubscriptionsComponent} from "./movies/movie-subscriptions/movie-subscriptions.component";
 
 const onS3 = true;
 const redirectUrl = onS3 ? 'https://cloud-cinema-front-bucket.s3.amazonaws.com/index.html' : 'http://localhost:4200';

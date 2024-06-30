@@ -51,20 +51,4 @@ export class HomeComponent implements OnInit{
       behavior: 'smooth'
     });
   }
-
-
-  subscribe():void {
-    const subscribeInfo : SubscriptionInfo = {
-      email:'travelbee.team22@gmail.com',
-      actors:[],
-      director:'Sonja',
-      genres:[]
-    }
-
-    this.movieService.subscribeSNS(subscribeInfo).subscribe(value => {
-      console.log("success!")
-    },error => {
-      console.error('Error sns:', error);
-    });
-  }
 }

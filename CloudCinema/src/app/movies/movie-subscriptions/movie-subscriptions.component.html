@@ -1,0 +1,17 @@
+<div>
+  <form [formGroup]="subscribeForm">
+    <div>
+      <label for="actors">Actors:</label>
+      <input type="text" id="actors" formControlName="actors">
+    </div>
+    <div>
+      <label for="director">Director:</label>
+      <input type="text" id="director" formControlName="director">
+    </div>
+    <div>
+      <label for="genres">Genres:</label>
+      <input type="text" id="genres" formControlName="genres">
+    </div>
+    <button (click)="subscribeSNS()">Subscribe</button>
+  </form>
+</div>
