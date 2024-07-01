@@ -1,7 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {MovieInfo, SubscriptionInfo} from "../models/models.module";
+import {MovieInfo, SubscriptionInfo,Subscription} from "../models/models.module";
 import {MovieService} from "../movie.service";
+import {SubscriptionsService} from "./subscriptions.service";
+import {HttpResponse} from "@angular/common/http";
+import {MatTableDataSource} from "@angular/material/table";
+
 
 @Component({
   selector: 'app-movie-subscriptions',
@@ -11,21 +15,26 @@ import {MovieService} from "../movie.service";
 export class MovieSubscriptionsComponent implements OnInit{
 
   subscribeForm: FormGroup;
+  dataSource = new MatTableDataSource<Subscription>([]);
+  displayedColumns: string[] = ['type', 'subscription', 'delete'];
 
-  constructor(private fb:FormBuilder,private movieService:MovieService) {
+  constructor(private fb:FormBuilder,private movieService:MovieService,private subService:SubscriptionsService) {
   }
 
   ngOnInit(): void {
     this.subscribeForm = this.fb.group({
       actors: [''],
-      director: [''],
+      directors: [''],
       genres: ['']
     });
+    this.getAll()
+
   }
 
   subscribeSNS() {
     let genres: string[] = [];
     let actors: string[] = [];
+    let directors: string[] = [];
     if (this.subscribeForm.value.genres.trim()!=""){
       genres = this.subscribeForm.value.genres.trim()
         .split(',')
@@ -38,24 +47,74 @@ export class MovieSubscriptionsComponent implements OnInit{
         .map((actor: string) => actor.trim())
         .filter((actor: string) => actor !== '');
     }
+    if (this.subscribeForm.value.directors.trim()!=""){
+      directors = this.subscribeForm.value.directors.trim()
+        .split(',')
+        .map((director: string) => director.trim())
+        .filter((director: string) => director !== '');
+    }
     //@ts-ignore
     const email=localStorage.getItem("userEmail").toString() || '';
-    const director=this.subscribeForm.value.director.trim();
 
 
     const subscription: SubscriptionInfo = {
       email: email,
-      director: director,
+      directors: directors,
       genres: genres,
       actors: actors,
     };
 
-    this.movieService.subscribeSNS(subscription).subscribe(value => {
+    this.subService.subscribeSNS(subscription).subscribe(value => {
       console.log("Successful subscription!")
     },error => {
       console.log("Error during subscription!")
     });
   }
 
+  getAll() {
+    //@ts-ignore
+    const email=localStorage.getItem("userEmail").toString() || '';
+    this.subService.getAll(email).subscribe({next: (data: Subscription[]) => {
+      this.dataSource.data = data;
+    },error: (_) => {
+        console.log("Error fetching data");
+      }
+    });
+  }
 
+  // delete() {
+  //   // @ts-ignore
+  //   const email=localStorage.getItem("userEmail").toString() || '';
+  //
+  //   this.subService.delete(email,"Actor-Glumac1").subscribe(
+  //     (response: HttpResponse<any>) => {
+  //       console.log("SUCCESS!")
+  //     },
+  //     error => {
+  //       console.error('Error:', error);
+  //     }
+  //   );
+  // }
+  deleteSub(sub:Subscription) {
+    let deleteSub=""
+    if(sub.type=="Director"){
+      deleteSub="Director-"+sub.subsription;
+    }else if(sub.type=="Actor"){
+      deleteSub="Actor-"+sub.subsription;
+    }else if(sub.type=="Genre"){
+      deleteSub="Genre-"+sub.subsription;
+    }
+    // @ts-ignore
+    const email=localStorage.getItem("userEmail").toString() || '';
+    this.subService.delete(email,deleteSub).subscribe(
+      (response: HttpResponse<any>) => {
+        console.log("SUCCESS!")
+        this.getAll()
+      },
+      error => {
+        console.error('Error:', error);
+      }
+    );
+
+  }
 }

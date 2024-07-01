@@ -1,6 +1,6 @@
 form {
   max-width: 400px;
-  margin: auto;
+  margin-left: 100px;
   padding-top: 150px;
 }
 
@@ -30,4 +30,24 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+#subTable{
+  background-color: rgba(234, 229, 229, 0.03);
+  box-shadow: none;
+}
+#subTable th,
+#subTable td {
+  padding: 10px;
+}
+#subscriptionsTableDiv{
+   align-items: flex-start;
+   width: 50%;
+   margin-top: 100px;
+   margin-left: 100px;
+   padding-bottom: 100px;
+
+ }
+.icons{
+  font-weight:unset;
+  color: #939393;
 }

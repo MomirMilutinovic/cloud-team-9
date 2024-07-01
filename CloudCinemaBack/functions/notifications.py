@@ -1,10 +1,16 @@
 import os
+import time
+import uuid
+from boto3.dynamodb.conditions import Attr
 import boto3
 import traceback
 import json
 
 
 sns_client = boto3.client("sns")
+subscription_table = os.environ['SUBSCRIPTION_TABLE']
+dynamodb = boto3.resource('dynamodb')
+
     
 
 def subscribe(event, context):
@@ -12,7 +18,7 @@ def subscribe(event, context):
         body = json.loads(event['body'])
         genres = body.get('genres', [])
         actors = body.get('actors', [])
-        director = body.get('director', '')
+        directors = body.get('directors', [])
         email = body.get('email', '')
 
         if not email:
@@ -20,15 +26,22 @@ def subscribe(event, context):
 
         for genre in genres:
             topic_arn = get_or_create_topic(f'Genre-{genre}')
-            subscribe_to_topic(topic_arn, email)
+            check=subscribe_to_topic(topic_arn, email)
+            if check:
+                write_to_dynamo(email,'Genre',genre)
 
         for actor in actors:
             topic_arn = get_or_create_topic(f'Actor-{actor}')
-            subscribe_to_topic(topic_arn, email)
+            check=subscribe_to_topic(topic_arn, email)
+            if check:
+                write_to_dynamo(email,'Actor',actor)
+    
 
-        if director:
+        for director in directors:
             topic_arn = get_or_create_topic(f'Director-{director}')
-            subscribe_to_topic(topic_arn, email)
+            check=subscribe_to_topic(topic_arn, email)
+            if check:
+                write_to_dynamo(email,'Director',director)
 
         return {
             'statusCode': 200,
@@ -55,7 +68,96 @@ def subscribe(event, context):
             }
         }
     
+def write_to_dynamo(email,type,sub):
+    id = uuid.uuid4()
+    timestamp = int(time.time())
+    table = dynamodb.Table(subscription_table)
+    response = table.put_item(
+        Item={
+                'id': str(id),
+                'timestamp': timestamp,
+                'email':email,
+                'type':type,
+                'subsription':sub      #promeni da je pismeno i na frontu i ovde
+            }
+        )
+    
+def get_subsriptions(event,context):
+    table = dynamodb.Table(subscription_table)
+    email = event['queryStringParameters']['email']
+    try:
+        response = table.scan(
+        FilterExpression=Attr('email').eq(email)
+        )
+        return {
+                'statusCode': 200,
+                'body': json.dumps(response['Items'],default=str),
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+            }
+    except Exception as e:
+        print('##EXCEPTION')
+        print(e)
+        print(traceback.format_exc())
+        print('#BODY')
+        print(event['body'])
+        return {
+            'statusCode': 500,
+            'body': 'Error: {}'.format(str(e))
+        }
 
+    
+def delete_subscription(event,context):
+    try:
+        table = dynamodb.Table(subscription_table)
+        email = event['queryStringParameters']['email']
+        sub = event['queryStringParameters']['sub']
+
+        sub=sub.split('-')[1]
+   
+        response = table.scan(
+        FilterExpression=Attr('email').eq(email) & Attr('subsription').eq(sub)
+        )
+        if 'Items' in response:
+            for item in response['Items']:
+                table.delete_item(
+                Key={
+                    'id': item['id'],
+                    'timestamp': int(item['timestamp'])
+                }
+        )
+        unsubscribe(email,sub)
+        return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin':'*'
+                },
+        }
+    except Exception as e:
+        print('##EXCEPTION')
+        print(e)
+        print(traceback.format_exc())
+        print('#BODY')
+        print(event['body'])
+        return {
+            'statusCode': 500,
+            'body': 'Error: {}'.format(str(e))
+        }
+    
+
+def unsubscribe(email,topic):
+    topicArn=get_existing_topic(topic)
+    if topicArn is not None:
+        subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=topicArn)
+        for subscription in subscriptions['Subscriptions']:
+            if subscription['Endpoint'] == email:
+                subscription_arn = subscription['SubscriptionArn']    
+                sns_client.unsubscribe(SubscriptionArn=subscription_arn)
+
+                
 def get_or_create_topic(topic_name):
     topics = sns_client.list_topics()
     for topic in topics['Topics']:
@@ -76,13 +178,14 @@ def subscribe_to_topic(topic_arn, email):
     subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)
     for subscription in subscriptions['Subscriptions']:
         if subscription['Endpoint'] == email:
-            return
+            return False
     
     sns_client.subscribe(
         TopicArn=topic_arn,
         Protocol='email',
         Endpoint=email
     )
+    return True
 
 
 def publish(event, context):
@@ -93,7 +196,7 @@ def publish(event, context):
 
                 genres = [attr['S'] for attr in new_image.get('genres', {}).get('L', [])]
                 actors = [attr['S'] for attr in new_image.get('actors', {}).get('L', [])]
-                director = new_image.get('director', {}).get('S', '')
+                directors = [attr['S'] for attr in new_image.get('directors', {}).get('L', [])]
                 message_content =''  
 
                 for genre in genres:
@@ -108,11 +211,14 @@ def publish(event, context):
                         message_content=f'Movie with actor {actor} was uploaded!'
                         publish_message(topic_arn, message_content)
 
-                if director:
-                    topic_arn = get_existing_topic(f'Director-{director}')
+                for director in directors:
+                    topic_arn = get_existing_topic(f'Director-{directors}')
                     if topic_arn:
-                        message_content=f'Movie with director:{director} was uploaded!'
+                        message_content=f'Movie with director {director} was uploaded!'
                         publish_message(topic_arn, message_content)
+
+
+                
 
         return {
             'statusCode': 200,

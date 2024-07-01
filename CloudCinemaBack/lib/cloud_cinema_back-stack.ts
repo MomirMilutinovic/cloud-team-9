@@ -213,6 +213,15 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1
     });
 
+    const subscription_table = new dynamodb.Table(this, 'CloudCinemaSubscriptionTable', {
+      tableName: 'cloud-cinema-subscription', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,
+      writeCapacity:1
+    });
+
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
       movieTable: movie_info_table,
@@ -383,13 +392,6 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const searchMovieIntegration = new apigateway.LambdaIntegration(searchMovies);
     moviesSearch.addMethod('GET', searchMovieIntegration);
 
-
-    // const movieTopic = new sns.Topic(this, 'MovieTopic', {
-    //   displayName: 'SNS topic for movie notification'
-    // });
-
-    // movieTopic.addSubscription(new subscriptions.EmailSubscription('travelbee.team22@gmail.com'));
-
     const publish = new lambda.Function(this, 'Publish', {
       runtime: lambda.Runtime.PYTHON_3_9,
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
@@ -402,17 +404,34 @@ export class CloudCinemaBackStack extends cdk.Stack {
       handler: 'notifications.subscribe',
     });
 
-    // publish.addEnvironment("SNS_ARN", movieTopic.topicArn)
-    // subscribe.addEnvironment("SNS_ARN", movieTopic.topicArn)
+    const deleteSubscriptions = new lambda.Function(this, 'DeleteSubsriptionFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'notifications.delete_subscription',  
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
 
-    // movieTopic.grantPublish(publish)
+    const getSubscriptions = new lambda.Function(this, 'GetSubsriptionFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'notifications.get_subsriptions', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
 
-    // movieTopic.addToResourcePolicy(new iam.PolicyStatement({
-    //   actions: ['sns:Subscribe','sns:ListSubscriptionsByTopic'],
-    //   resources: [movieTopic.topicArn],
-    //   principals: [new iam.ServicePrincipal('lambda.amazonaws.com')],
-    //   effect: iam.Effect.ALLOW,
-    // }));
+    subscription_table.grantWriteData(subscribe);
+    subscription_table.grantFullAccess(deleteSubscriptions);
+    subscription_table.grantReadData(getSubscriptions);
+
+    subscribe.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+    publish.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+    deleteSubscriptions.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+    getSubscriptions.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+
+    deleteSubscriptions.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:Unsubscribe','sns:ListTopics','sns:ListSubscriptionsByTopic'],
+      resources: ['*'],
+      effect: iam.Effect.ALLOW,
+    }));
 
     subscribe.addToRolePolicy(new iam.PolicyStatement({
       actions: ['sns:Subscribe', 'sns:ListTopics','sns:CreateTopic','sns:ListSubscriptionsByTopic','sns:ListSubscriptions'],
@@ -430,6 +449,18 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const subscribeInfoIntegration = new apigateway.LambdaIntegration(subscribe);
     snsBase.addMethod('POST', subscribeInfoIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+    
+    const getSubscriptionsIntegration = new apigateway.LambdaIntegration(getSubscriptions);
+    snsBase.addMethod('GET', getSubscriptionsIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    const deleteSubscriptionsIntegration = new apigateway.LambdaIntegration(deleteSubscriptions);
+    snsBase.addMethod('DELETE', deleteSubscriptionsIntegration, {
       authorizer: userAuthorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO 
     });
