@@ -1,10 +1,12 @@
 <div class="movie-card">
-  <h2>{{ movie.name }}</h2>
-  <p>{{ movie.description }}</p>
-  <p><strong>Genres:</strong> {{ movie.genres }}</p>
-  <p><strong>Year:</strong> {{ movie.year }}</p>
-  <p><strong>Actors:</strong> {{ movie.actors }}</p>
-  <p><strong>Directors:</strong> {{ movie.director}}</p>
+  <div id="card-info-div">
+    <h2>{{ movie.name }}</h2>
+    <p>{{ movie.description }}</p>
+    <p><strong>Genres:</strong> {{ movie.genres }}</p>
+    <p><strong>Year:</strong> {{ movie.year }}</p>
+    <p><strong>Actors:</strong> {{ movie.actors }}</p>
+    <p><strong>Directors:</strong> {{ movie.director}}</p>
+  </div>
   <div class="buttons">
     <button class="btn download" (click)="download(movie.id)"><mat-icon>get_app</mat-icon></button>
     <button class="btn delete" (click)="delete(movie)" [disabled]="editDisabled"><mat-icon>delete</mat-icon></button>

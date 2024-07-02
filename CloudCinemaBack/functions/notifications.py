@@ -78,11 +78,11 @@ def write_to_dynamo(email,type,sub):
                 'timestamp': timestamp,
                 'email':email,
                 'type':type,
-                'subsription':sub      #promeni da je pismeno i na frontu i ovde
+                'subscription':sub      #promeni da je pismeno i na frontu i ovde
             }
         )
     
-def get_subsriptions(event,context):
+def get_subscriptions(event,context):
     table = dynamodb.Table(subscription_table)
     email = event['queryStringParameters']['email']
     try:
@@ -115,10 +115,10 @@ def delete_subscription(event,context):
         email = event['queryStringParameters']['email']
         sub = event['queryStringParameters']['sub']
 
-        sub=sub.split('-')[1]
+        type,sub_attr=sub.split('-')
    
         response = table.scan(
-        FilterExpression=Attr('email').eq(email) & Attr('subsription').eq(sub)
+        FilterExpression=Attr('email').eq(email) & Attr('subscription').eq(sub_attr) & Attr('type').eq(type)
         )
         if 'Items' in response:
             for item in response['Items']:
@@ -196,7 +196,7 @@ def publish(event, context):
 
                 genres = [attr['S'] for attr in new_image.get('genres', {}).get('L', [])]
                 actors = [attr['S'] for attr in new_image.get('actors', {}).get('L', [])]
-                directors = [attr['S'] for attr in new_image.get('directors', {}).get('L', [])]
+                director = new_image.get('director', {}).get('S', '')
                 message_content =''  
 
                 for genre in genres:
@@ -211,8 +211,8 @@ def publish(event, context):
                         message_content=f'Movie with actor {actor} was uploaded!'
                         publish_message(topic_arn, message_content)
 
-                for director in directors:
-                    topic_arn = get_existing_topic(f'Director-{directors}')
+                if director:
+                    topic_arn = get_existing_topic(f'Director-{director}')
                     if topic_arn:
                         message_content=f'Movie with director {director} was uploaded!'
                         publish_message(topic_arn, message_content)

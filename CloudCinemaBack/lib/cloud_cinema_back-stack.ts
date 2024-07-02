@@ -404,16 +404,16 @@ export class CloudCinemaBackStack extends cdk.Stack {
       handler: 'notifications.subscribe',
     });
 
-    const deleteSubscriptions = new lambda.Function(this, 'DeleteSubsriptionFunction', {
+    const deleteSubscriptions = new lambda.Function(this, 'DeleteSubscriptionFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'notifications.delete_subscription',  
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
       timeout: cdk.Duration.seconds(30)
     });
 
-    const getSubscriptions = new lambda.Function(this, 'GetSubsriptionFunction', {
+    const getSubscriptions = new lambda.Function(this, 'GetSubscriptionFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
-      handler: 'notifications.get_subsriptions', 
+      handler: 'notifications.get_subscriptions', 
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
       timeout: cdk.Duration.seconds(30)
     });

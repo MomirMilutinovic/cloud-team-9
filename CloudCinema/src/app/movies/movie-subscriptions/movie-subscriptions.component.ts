@@ -98,11 +98,11 @@ export class MovieSubscriptionsComponent implements OnInit{
   deleteSub(sub:Subscription) {
     let deleteSub=""
     if(sub.type=="Director"){
-      deleteSub="Director-"+sub.subsription;
+      deleteSub="Director-"+sub.subscription;
     }else if(sub.type=="Actor"){
-      deleteSub="Actor-"+sub.subsription;
+      deleteSub="Actor-"+sub.subscription;
     }else if(sub.type=="Genre"){
-      deleteSub="Genre-"+sub.subsription;
+      deleteSub="Genre-"+sub.subscription;
     }
     // @ts-ignore
     const email=localStorage.getItem("userEmail").toString() || '';

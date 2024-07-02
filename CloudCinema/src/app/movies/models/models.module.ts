@@ -21,5 +21,5 @@ export interface Subscription{
   email?: string,
   timestamp?:string,
   type?:string,
-  subsription?:string
+  subscription?:string
 }
