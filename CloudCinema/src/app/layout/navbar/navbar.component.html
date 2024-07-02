@@ -1,11 +1,11 @@
-<form>
+<form [formGroup]="searchForm">
 <mat-toolbar>
   <div class="travelBee">
     <img class="logo" src="../../../assets/images/cloud_logo.png" alt="Illustration Image">
   </div>
   <div class="leftSide">
     <button mat-icon-button class="example-icon favorite-icon">
-      <span>Home</span>
+      <mat-icon>home</mat-icon>
     </button>
 <!--    <button  mat-icon-button class="example-icon favorite-icon">-->
 <!--      <span>Movies</span>-->
@@ -13,15 +13,15 @@
 <!--    <button  mat-icon-button class="example-icon favorite-icon">-->
 <!--      <span>Series</span>-->
 <!--    </button>-->
-    <div class="dropdown">
-      <button class="dropbtn">Genres</button>
-      <div formControlName="genre" class="dropdown-content">
-        <a href="#">Horror</a>
-        <a href="#">Romance</a>
-        <a href="#">Action</a>
-        <a href="#">Comedy</a>
-      </div>
-    </div>
+<!--    <div class="dropdown">-->
+<!--      <button class="dropbtn">Genres</button>-->
+<!--      <div formControlName="genre" class="dropdown-content">-->
+<!--        <a href="#">Horror</a>-->
+<!--        <a href="#">Romance</a>-->
+<!--        <a href="#">Action</a>-->
+<!--        <a href="#">Comedy</a>-->
+<!--      </div>-->
+<!--    </div>-->
 
 <!--    <mat-form-field>-->
 <!--      <mat-label>Favorite food</mat-label>-->
@@ -43,7 +43,6 @@
 
     <div class="search-container">
       <mat-form-field appearance="outline">
-        <mat-icon matPrefix>search</mat-icon>
         <div>
           <input formControlName="movieName" matInput placeholder="Search movies">
         </div>
@@ -51,12 +50,26 @@
     </div>
     <div class="search-container">
       <mat-form-field appearance="outline">
-        <mat-icon matPrefix>search</mat-icon>
         <div>
           <input formControlName="actors" matInput placeholder="Search actors">
         </div>
       </mat-form-field>
     </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="director" matInput placeholder="Search director">
+        </div>
+      </mat-form-field>
+    </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="genres" matInput placeholder="Search genres">
+        </div>
+      </mat-form-field>
+    </div>
+    <button (click)="search()"><mat-icon matPrefix>search</mat-icon></button>
 
 </div>
 

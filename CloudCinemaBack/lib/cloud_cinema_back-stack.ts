@@ -287,7 +287,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
     movie_info_table.grantReadData(searchMovies);
 
     searchMovies.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
-    movie_info_table.grantReadData(searchMovies);
+    movie_search_table.grantReadData(searchMovies);
+
+    searchMovies.addEnvironment("INDEX_NAME","SearchIndex")
 
 
     const startMovieDelete = new lambda.Function(this, 'StartMovieDeleteFunction', {
@@ -390,7 +392,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const moviesSearch = moviesBase.addResource('search');
     const searchMovieIntegration = new apigateway.LambdaIntegration(searchMovies);
-    moviesSearch.addMethod('GET', searchMovieIntegration);
+    moviesSearch.addMethod('GET', searchMovieIntegration,{
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
 
     const publish = new lambda.Function(this, 'Publish', {
       runtime: lambda.Runtime.PYTHON_3_9,
