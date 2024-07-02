@@ -203,6 +203,25 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1,
       stream:dynamodb.StreamViewType.NEW_IMAGE
     }); 
+
+    const watch_history_table = new dynamodb.Table(this, 'CloudCinemaWatchHistoryTable', {
+      tableName: 'cloud-cinema-watch-history', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,           
+      writeCapacity:1,
+      // stream:dynamodb.StreamViewType.NEW_IMAGE
+    });
+
+    const rating_info_table = new dynamodb.Table(this, 'CloudCinemaRatingInfoTable', {
+      tableName: 'cloud-cinema-rating-info', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,           
+      writeCapacity:1,
+    }); 
     
     const movie_search_table = new dynamodb.Table(this, 'CloudCinemaMovieSearchTable', {
       tableName: 'cloud-cinema-movie-search', 
@@ -475,5 +494,40 @@ export class CloudCinemaBackStack extends cdk.Stack {
       batchSize: 100,
       retryAttempts: 1,
     }));
+
+    const rateMovie = new lambda.Function(this, 'RateMovieInfoFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'rating.rate', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    const rateBase = api.root.addResource('rate');
+    const rateMovieIntegration = new apigateway.LambdaIntegration(rateMovie);
+    rateBase.addMethod('POST', rateMovieIntegration, { 
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    rateMovie.addEnvironment("TABLE_NAME", rating_info_table.tableName)
+    rating_info_table.grantWriteData(rateMovie);
+
+
+    const updateWatchHistory = new lambda.Function(this, 'UpdateWatchHistoryFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'watch_history.put_item', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    const historyBase = api.root.addResource('update_watch_history');
+    const watchHistoryIntegration = new apigateway.LambdaIntegration(updateWatchHistory);
+    historyBase.addMethod('POST', watchHistoryIntegration, { 
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    updateWatchHistory.addEnvironment("TABLE_NAME", watch_history_table.tableName)
+    watch_history_table.grantWriteData(updateWatchHistory);
   }
 }

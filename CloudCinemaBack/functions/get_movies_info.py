@@ -10,7 +10,7 @@ table_name = os.environ['TABLE_NAME']
 def get_all(event, context):
     try:
         dynamodb = boto3.resource('dynamodb')
-        table=dynamodb.Table(table_name)
+        table = dynamodb.Table(table_name)
         response=table.scan()
         return {
             'statusCode': 200,

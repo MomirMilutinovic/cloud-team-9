@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {MovieInfo} from "./models/models.module";
+import {MovieInfo, RatingInfo, WatchInfo} from "./models/models.module";
 import {SubscriptionInfo} from "./models/models.module";
 import {catchError, map, Observable, of} from "rxjs";
 import {BehaviorSubject, catchError, map, Observable, of} from "rxjs";
@@ -26,7 +26,7 @@ export class MovieService {
 
   getAll(): Observable<MovieInfo[]> {
     const url = environment.apiHost + 'movies_info';
-    return this.httpClient.get<any[]>(url)
+    return this.httpClient.get<any[]>(url);
   }
 
   getMovieInfo(id: string,timestamp:number): Observable<MovieInfo>  {
@@ -47,6 +47,17 @@ export class MovieService {
     params = params.append('params', query);
     return this.httpClient.get<MovieInfo[]>(url,{params});
   }
+
+  updateWatchHistory(info: WatchInfo): Observable<HttpResponse<any>>  {
+    const url = environment.apiHost + 'update_watch_history';
+    return this.httpClient.post<any>(url, info);
+  }
+
+  rateMovie(info: RatingInfo): Observable<HttpResponse<any>>  {
+    const url = environment.apiHost + 'rate';
+    return this.httpClient.post<any>(url, info);
+  }
+
   editMovie(movieInfo: MovieInfo): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',

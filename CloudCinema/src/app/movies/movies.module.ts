@@ -6,6 +6,7 @@ import { EditMovieComponent } from './edit-movie/edit-movie.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import {RouterLink} from "@angular/router";
 import { PlayerComponent } from './player/player.component';
+import { MovieInfoComponent } from './movie-info/movie-info.component';
 import { MovieSubscriptionsComponent } from './movie-subscriptions/movie-subscriptions.component';
 import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
@@ -17,6 +18,7 @@ import {MatButtonModule} from "@angular/material/button";
     MovieCardComponent,
     EditMovieComponent,
     PlayerComponent,
+    MovieInfoComponent,
     MovieSubscriptionsComponent
   ],
   exports: [

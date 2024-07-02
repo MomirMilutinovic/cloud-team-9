@@ -16,6 +16,18 @@ export interface SubscriptionInfo{
   genres: string[];
 }
 
+export interface WatchInfo{
+  email: string;
+  movie_id?:string;
+}
+
+export interface RatingInfo{
+  email: string;
+  type: string;
+  rate: number;
+  attributes?: string[];
+}
+
 export interface Subscription{
   id?:string,
   email?: string,
@@ -23,3 +35,4 @@ export interface Subscription{
   type?:string,
   subscription?:string
 }
+

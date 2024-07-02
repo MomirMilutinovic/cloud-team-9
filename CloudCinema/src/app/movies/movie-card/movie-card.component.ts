@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {MovieInfo} from "../models/models.module";
+import {MovieInfo, WatchInfo} from "../models/models.module";
 import {MovieService} from "../movie.service";
 import {HttpResponse} from "@angular/common/http";
 import {Router} from "@angular/router";
@@ -14,6 +14,7 @@ export class MovieCardComponent implements OnInit {
   @Input()
   movie: MovieInfo;
 
+  userEmail:string|null;
   editDisabled = true;
 
   constructor(private movieService: MovieService, private authService: AuthService, private router: Router) {
@@ -45,8 +46,24 @@ export class MovieCardComponent implements OnInit {
     );
   }
 
-  play(movieId: string | undefined) {
-    this.router.navigate(["/play", movieId]);
+  play(movieId: string | undefined, timestamp: number | undefined) {
+    //pozvati prikaz informacija
+    this.userEmail = localStorage.getItem('userEmail') || ""
+    const info: WatchInfo = {
+      email: this.userEmail,
+      movie_id: movieId
+    }
+    this.movieService.updateWatchHistory(info).subscribe(
+      (response: HttpResponse<any>) => {
+        console.log("SUCCESS!")
+      },
+      error => {
+        console.error('Error:', error);
+      }
+    );
+    this.router.navigate(["/details", movieId, timestamp]);
+
+    // this.router.navigate(["/play", movieId]);
   }
 
   edit(id: string | undefined, timestamp: number | undefined) {
