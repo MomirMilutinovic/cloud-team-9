@@ -1,0 +1,53 @@
+form {
+  max-width: 400px;
+  margin-left: 100px;
+  padding-top: 150px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+#subTable{
+  background-color: rgba(234, 229, 229, 0.03);
+  box-shadow: none;
+}
+#subTable th,
+#subTable td {
+  padding: 10px;
+}
+#subscriptionsTableDiv{
+   align-items: flex-start;
+   width: 50%;
+   margin-top: 100px;
+   margin-left: 100px;
+   padding-bottom: 100px;
+
+ }
+.icons{
+  font-weight:unset;
+  color: #939393;
+}

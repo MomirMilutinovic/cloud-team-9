@@ -4,6 +4,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import {MaterialModule} from "../infrastructure/material/material.module";
 import { HomeComponent } from './home/home.component';
 import {MoviesModule} from "../movies/movies.module";
+import {RouterLink} from "@angular/router";
 
 
 
@@ -15,10 +16,11 @@ import {MoviesModule} from "../movies/movies.module";
   exports: [
     NavbarComponent
   ],
-  imports: [
-    CommonModule,
-    MoviesModule,
-    MaterialModule
-  ]
+    imports: [
+        CommonModule,
+        MoviesModule,
+        MaterialModule,
+        RouterLink
+    ]
 })
 export class LayoutModule { }

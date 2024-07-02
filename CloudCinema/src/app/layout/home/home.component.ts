@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {MovieInfo} from "../../movies/models/models.module";
 import {SubscriptionInfo} from "../../movies/models/models.module";
 import {getDownlevelDecoratorsTransform} from "@angular/compiler-cli/src/transformers/downlevel_decorators_transform";
@@ -16,6 +16,10 @@ export class HomeComponent implements OnInit{
   ngOnInit(): void {
     this.movieService.getAll().subscribe(value => {
       this.movies=value;
+      this.movieService.setMovies(this.movies);
+      this.movieService.getMovies().subscribe(movies => {
+        this.movies = movies;
+      });
     },error => {
       console.error('Error fetching movies:', error);
     });
@@ -49,22 +53,6 @@ export class HomeComponent implements OnInit{
     container.scrollBy({
       left: 300,
       behavior: 'smooth'
-    });
-  }
-
-
-  subscribe():void {
-    const subscribeInfo : SubscriptionInfo = {
-      email:'travelbee.team22@gmail.com',
-      actors:[],
-      director:'Sonja',
-      genres:[]
-    }
-
-    this.movieService.subscribeSNS(subscribeInfo).subscribe(value => {
-      console.log("success!")
-    },error => {
-      console.error('Error sns:', error);
     });
   }
 }

@@ -7,6 +7,9 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {RouterLink} from "@angular/router";
 import { PlayerComponent } from './player/player.component';
 import { MovieInfoComponent } from './movie-info/movie-info.component';
+import { MovieSubscriptionsComponent } from './movie-subscriptions/movie-subscriptions.component';
+import {MatTableModule} from "@angular/material/table";
+import {MatButtonModule} from "@angular/material/button";
 
 
 
@@ -16,6 +19,7 @@ import { MovieInfoComponent } from './movie-info/movie-info.component';
     EditMovieComponent,
     PlayerComponent,
     MovieInfoComponent,
+    MovieSubscriptionsComponent
   ],
   exports: [
     MovieCardComponent
@@ -24,7 +28,9 @@ import { MovieInfoComponent } from './movie-info/movie-info.component';
     CommonModule,
     MatIconModule,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    MatTableModule,
+    MatButtonModule
   ]
 })
 export class MoviesModule { }

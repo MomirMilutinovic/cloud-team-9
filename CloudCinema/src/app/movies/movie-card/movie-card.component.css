@@ -5,7 +5,10 @@
   border-radius: 10px;
   box-shadow: 4px 4px 8px rgba(98, 97, 97, 0.6);
   width: 300px;
-
+  height: 260px;
+}
+#card-info-div{
+  height: 210px;
 }
 .movie-card h2, .series-card h2{
   margin-top: 0;
@@ -17,8 +20,8 @@
 
 .buttons {
   display: flex;
-  justify-content:left;
-  margin-top: 20px;
+  justify-content:flex-start;
+  margin-top: 5px;
 }
 
 .btn {

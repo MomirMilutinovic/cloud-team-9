@@ -12,7 +12,7 @@ export interface MovieInfo{
 export interface SubscriptionInfo{
   email: string;
   actors: string[];
-  director: string;
+  directors: string[];
   genres: string[];
 }
 
@@ -27,3 +27,12 @@ export interface RatingInfo{
   rate: number;
   attributes?: string[];
 }
+
+export interface Subscription{
+  id?:string,
+  email?: string,
+  timestamp?:string,
+  type?:string,
+  subscription?:string
+}
+
