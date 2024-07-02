@@ -11,9 +11,10 @@ import { MovieDeleteStepFunction } from './movie_delete_step_function';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-
-
-
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 export class CloudCinemaBackStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -199,7 +200,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
-      writeCapacity:1
+      writeCapacity:1,
+      stream:dynamodb.StreamViewType.NEW_IMAGE
     }); 
     
     const movie_search_table = new dynamodb.Table(this, 'CloudCinemaMovieSearchTable', {
@@ -207,11 +209,18 @@ export class CloudCinemaBackStack extends cdk.Stack {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      readCapacity:1,           
+      readCapacity:1,
       writeCapacity:1
-    });  
+    });
 
-
+    const subscription_table = new dynamodb.Table(this, 'CloudCinemaSubscriptionTable', {
+      tableName: 'cloud-cinema-subscription', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,
+      writeCapacity:1
+    });
 
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
@@ -388,6 +397,83 @@ export class CloudCinemaBackStack extends cdk.Stack {
       authorizationType: apigateway.AuthorizationType.COGNITO 
     });
 
+    const publish = new lambda.Function(this, 'Publish', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      handler: 'notifications.publish',
+    });
 
+    const subscribe = new lambda.Function(this, 'Subscribe', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      handler: 'notifications.subscribe',
+    });
+
+    const deleteSubscriptions = new lambda.Function(this, 'DeleteSubscriptionFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'notifications.delete_subscription',  
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    const getSubscriptions = new lambda.Function(this, 'GetSubscriptionFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'notifications.get_subscriptions', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    subscription_table.grantWriteData(subscribe);
+    subscription_table.grantFullAccess(deleteSubscriptions);
+    subscription_table.grantReadData(getSubscriptions);
+
+    subscribe.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+    publish.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+    deleteSubscriptions.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+    getSubscriptions.addEnvironment("SUBSCRIPTION_TABLE",subscription_table.tableName)
+
+    deleteSubscriptions.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:Unsubscribe','sns:ListTopics','sns:ListSubscriptionsByTopic'],
+      resources: ['*'],
+      effect: iam.Effect.ALLOW,
+    }));
+
+    subscribe.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:Subscribe', 'sns:ListTopics','sns:CreateTopic','sns:ListSubscriptionsByTopic','sns:ListSubscriptions'],
+      resources: ['*'],
+      effect: iam.Effect.ALLOW,
+    }));
+    publish.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['sns:Publish', 'sns:ListTopics','sns:CreateTopic','sns:ListSubscriptionsByTopic','sns:ListSubscriptions'],
+      resources: ['*'],
+      effect: iam.Effect.ALLOW
+    }));
+
+
+    const snsBase = api.root.addResource('subscribe')
+
+    const subscribeInfoIntegration = new apigateway.LambdaIntegration(subscribe);
+    snsBase.addMethod('POST', subscribeInfoIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+    
+    const getSubscriptionsIntegration = new apigateway.LambdaIntegration(getSubscriptions);
+    snsBase.addMethod('GET', getSubscriptionsIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    const deleteSubscriptionsIntegration = new apigateway.LambdaIntegration(deleteSubscriptions);
+    snsBase.addMethod('DELETE', deleteSubscriptionsIntegration, {
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    publish.addEventSource(new DynamoEventSource(movie_info_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
   }
 }

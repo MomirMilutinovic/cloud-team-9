@@ -1,5 +1,7 @@
 import {Injectable} from '@angular/core';
 import {MovieInfo} from "./models/models.module";
+import {SubscriptionInfo} from "./models/models.module";
+import {catchError, map, Observable, of} from "rxjs";
 import {BehaviorSubject, catchError, map, Observable, of} from "rxjs";
 import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../env/env";
@@ -25,23 +27,6 @@ export class MovieService {
   getAll(): Observable<MovieInfo[]> {
     const url = environment.apiHost + 'movies_info';
     return this.httpClient.get<any[]>(url)
-    .pipe(map(response => {
-        return response.length > 0 ? response.map(({ id, name, genres, actors, director, year, timestamp }) => ({
-          id: id.S,
-          name: name.S,
-          genres: genres?.L.map((genre: { S: string }) => genre.S) || [],
-          actors: actors?.L.map((actor: { S: string }) => actor.S) || [],
-          director: director.S,
-          year: year ? parseInt(year.N, 10) : undefined,
-          timestamp: timestamp ? parseInt(timestamp.N, 10) : undefined
-
-        })) : [];
-      }),
-      catchError(error => {
-        console.error('Error fetching movies:', error);
-        return [];
-      })
-    );
   }
 
   getMovieInfo(id: string,timestamp:number): Observable<MovieInfo>  {
@@ -62,7 +47,6 @@ export class MovieService {
     params = params.append('params', query);
     return this.httpClient.get<MovieInfo[]>(url,{params});
   }
-
   editMovie(movieInfo: MovieInfo): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',

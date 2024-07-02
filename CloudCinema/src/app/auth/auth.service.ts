@@ -34,6 +34,7 @@ export class AuthService {
             password: password,
         });
         if (nextStep.signInStep == "DONE") {
+            localStorage.setItem('userEmail', email);
             this.router.navigate(['/home']);
         }
 
@@ -66,7 +67,8 @@ export class AuthService {
         console.log("Next step", nextStep);
         if (nextStep.signUpStep == "COMPLETE_AUTO_SIGN_IN") {
             await autoSignIn();
-            this.router.navigate(['/home']);
+          localStorage.setItem('userEmail', email);
+          this.router.navigate(['/home']);
         }
 
         return {isSignUpComplete, nextStep};
