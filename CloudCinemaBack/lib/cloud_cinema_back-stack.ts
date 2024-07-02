@@ -301,6 +301,20 @@ export class CloudCinemaBackStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
       timeout: cdk.Duration.seconds(30)
     });
+    const scanMovies = new lambda.Function(this, 'ScanMoviesFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'movies_search.get_all_scan', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    scanMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    movie_info_table.grantReadData(scanMovies);
+
+    scanMovies.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
+    movie_search_table.grantReadData(scanMovies);
+
+    scanMovies.addEnvironment("INDEX_NAME","SearchIndex")
 
     searchMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(searchMovies);
@@ -412,6 +426,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const moviesSearch = moviesBase.addResource('search');
     const searchMovieIntegration = new apigateway.LambdaIntegration(searchMovies);
     moviesSearch.addMethod('GET', searchMovieIntegration,{
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+    const moviesScan = moviesBase.addResource('scan');
+    const scanMovieIntegration = new apigateway.LambdaIntegration(scanMovies);
+    moviesScan.addMethod('GET', scanMovieIntegration,{
       authorizer: userAuthorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO 
     });

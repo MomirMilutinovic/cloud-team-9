@@ -23,6 +23,7 @@ def start_movie_upload(event, context):
         director = request_body['director']
         actors = request_body['actors']
         year = request_body['year']
+        genres=request_body['genres']
         id = uuid.uuid4()
 
         table = dynamodb.Table(table_name)
@@ -32,12 +33,15 @@ def start_movie_upload(event, context):
                 'name': name,
                 'director': director,
                 'actors': actors,
+                'genres':genres,
                 'year': year,
                 'timestamp': timestamp,
                 'pending': True
             }
         )
-        attributes=name+","+",".join(actors)+","+director   #namestiti da ide kao na frontu  name+","+actors+","+director+","+genres
+        actors.sort()
+        genres.sort()
+        attributes=name+","+",".join(actors)+","+director+","+",".join(genres)  
         search_table = dynamodb.Table(search_table_name)
         search_response = search_table.put_item(
             Item={
