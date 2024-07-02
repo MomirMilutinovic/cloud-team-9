@@ -1,0 +1,65 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+.container {
+    background-color: white;
+    padding: 40px 60px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 100%;
+    text-align: left;
+}
+
+h1 {
+    color: #444;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.details {
+    margin-top: 20px;
+}
+
+p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+strong {
+    color: #555;
+}
+
+.filled-star {
+    color: gold; /* or any color you prefer for filled stars */
+  }
+  
+.empty-star {
+    color: #ddd; /* or any color you prefer for empty stars */
+}
+
+.checked {
+    color: yellow;
+}
+
+button{
+    margin-left: 15px;
+    border: none;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #fff;
+    /* background: hsl(60, 1%, 84%, 90); */
+}

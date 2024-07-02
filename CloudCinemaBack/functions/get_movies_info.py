@@ -9,8 +9,9 @@ table_name = os.environ['TABLE_NAME']
 
 def get_all(event, context):
     try:
-        dynamodb = boto3.client('dynamodb')
-        response=dynamodb.scan(TableName=table_name)
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table(table_name)
+        response=table.scan()
         return {
             'statusCode': 200,
             'body': json.dumps(response['Items'],default=str),

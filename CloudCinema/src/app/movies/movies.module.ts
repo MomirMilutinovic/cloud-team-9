@@ -6,6 +6,7 @@ import { EditMovieComponent } from './edit-movie/edit-movie.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import {RouterLink} from "@angular/router";
 import { PlayerComponent } from './player/player.component';
+import { MovieInfoComponent } from './movie-info/movie-info.component';
 
 
 
@@ -13,7 +14,8 @@ import { PlayerComponent } from './player/player.component';
   declarations: [
     MovieCardComponent,
     EditMovieComponent,
-    PlayerComponent
+    PlayerComponent,
+    MovieInfoComponent,
   ],
   exports: [
     MovieCardComponent

@@ -15,3 +15,15 @@ export interface SubscriptionInfo{
   director: string;
   genres: string[];
 }
+
+export interface WatchInfo{
+  email: string;
+  movie_id?:string;
+}
+
+export interface RatingInfo{
+  email: string;
+  type: string;
+  rate: number;
+  attributes?: string[];
+}
