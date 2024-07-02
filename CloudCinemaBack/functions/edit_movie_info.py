@@ -29,6 +29,7 @@ def edit_one(event, context):
         year = int(request_body['year'])
         id = request_body['id']
         genres = request_body['genres']
+        episode = request_body['episode']
 
         table = dynamodb.Table(table_name)
 
@@ -37,20 +38,22 @@ def edit_one(event, context):
                 'id': id,
                 'timestamp': timestamp
             },
-            UpdateExpression='SET #name = :name, #director = :director, #actors = :actors, #year = :year, #genres = :genres',
+            UpdateExpression='SET #name = :name, #director = :director, #actors = :actors, #year = :year, #genres = :genres, #episode = :episode',
             ExpressionAttributeNames={
                 '#name': 'name',
                 '#director': 'director',
                 '#actors': 'actors',
                 '#year': 'year',
-                '#genres': 'genres'
+                '#genres': 'genres',
+                '#episode': 'episode'
             },
             ExpressionAttributeValues={
                 ':name': name,
                 ':director': director,
                 ':actors': actors,
                 ':year': year,
-                ':genres': genres
+                ':genres': genres,
+                ':episode': episode
             },
             ReturnValues='ALL_NEW'
         )

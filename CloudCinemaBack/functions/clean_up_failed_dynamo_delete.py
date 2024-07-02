@@ -14,6 +14,9 @@ def clean_up(event, context):
         actors = event['movieDetails']['actors']
         director = event['movieDetails']['director']
         year = event['movieDetails']['year']
+        genres = event['movieDetails']['genres']
+        episode = event['movieDetails']['episode']
+
 
         movie_table = dynamodb.Table(table_name)
         
@@ -24,6 +27,8 @@ def clean_up(event, context):
                 'director': director,
                 'actors': actors,
                 'year': year,
+                'episode': episode,
+                'genres': genres,
                 'timestamp': int(timestamp),
                 'pending': False
             }

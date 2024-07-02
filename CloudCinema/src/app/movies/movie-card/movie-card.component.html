@@ -10,7 +10,11 @@
   <div class="buttons">
     <button class="btn download" (click)="download(movie.id)"><mat-icon>get_app</mat-icon></button>
     <button class="btn delete" (click)="delete(movie)" [disabled]="editDisabled"><mat-icon>delete</mat-icon></button>
+<<<<<<< Updated upstream
     <button class="btn edit" (click)="edit(movie.id,movie.timestamp)" [disabled]="editDisabled"><mat-icon>edit</mat-icon></button>
+=======
+    <button class="btn edit" (click)="edit(movie.id,movie.timestamp)" [routerLink]="['movies/movieEdit',movie.id, movie.timestamp]" [disabled]="editDisabled"><mat-icon>edit</mat-icon></button>
+>>>>>>> Stashed changes
     <button class="btn play" (click)="play(movie.id, movie.genres, movie.actors, movie.timestamp)"><mat-icon>play_circle_outline</mat-icon></button>
   </div>
 </div>
