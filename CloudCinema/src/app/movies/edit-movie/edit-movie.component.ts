@@ -31,7 +31,8 @@ export class EditMovieComponent implements OnInit{
       actors: [[]],
       director: ['', Validators.required],
       year: ['', Validators.required],
-      timestamp: ['', Validators.required]
+      timestamp: ['', Validators.required],
+      episode:['',Validators.required]
     });
 
     this.route.paramMap.subscribe(params => {
@@ -56,6 +57,7 @@ export class EditMovieComponent implements OnInit{
       actors: this.movieForm.value.actors.toString().split(','),
       year: this.movieForm.value.year as number,
       timestamp: this.movie.timestamp,
+      episode:this.movieForm.value.episode as string,
     };
 
     console.log(updatedMovie)

@@ -7,10 +7,12 @@ import { Platform } from '@angular/cdk/platform';
 import { PlayerComponent } from './movies/player/player.component';
 import { MovieInfoComponent } from './movies/movie-info/movie-info.component';
 import {MovieSubscriptionsComponent} from "./movies/movie-subscriptions/movie-subscriptions.component";
+import {ViewEpisodesComponent} from "./series/view-episodes/view-episodes.component";
 
 const routes: Routes = [
   {path: '', redirectTo: '/home', pathMatch: 'full'},
   {path:"home/movies/movieEdit/:id/:timestamp", component: EditMovieComponent},
+  {path:"home/movies/episodesView/:seriesName", component: ViewEpisodesComponent},
   {path:"home",component:HomeComponent},
   {path:'login', component: LoginPageComponent},
   {path:'details/:id/:timestamp', component: MovieInfoComponent},

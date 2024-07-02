@@ -1,0 +1,53 @@
+.movie-card, .series-card{
+  flex: 0 0 auto;
+  background-color: rgba(255, 255, 255, 0.86);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 4px 4px 8px rgba(98, 97, 97, 0.6);
+  width: 300px;
+  height: 260px;
+}
+#card-info-div{
+  height: 210px;
+}
+.movie-card h2, .series-card h2{
+  margin-top: 0;
+}
+
+.movie-card p, .series-card p{
+  margin: 10px 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content:flex-start;
+  margin-top: 5px;
+}
+
+.btn {
+  padding: 7px 7px;
+  border: none;
+  margin-right: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+}
+
+.download {
+  background-color: rgba(114, 113, 113, 0.82);
+}
+
+.play {
+  background-color: rgb(113, 146, 178);
+}
+.delete{
+  background-color: rgba(114, 113, 113, 0.82);
+}
+.edit{
+  background-color: rgba(114, 113, 113, 0.82);
+}
+
+.btn:hover {
+  opacity: 0.8;
+}

@@ -9,6 +9,14 @@ body {
     height: 100vh;
     color: #333;
 }
+#titlePlayDiv{
+  display: flex;
+}
+#playBtn{
+  margin-top: 30px;
+  height: 50px;
+}
+
 
 .container {
     background-color: white;
@@ -44,7 +52,7 @@ strong {
 .filled-star {
     color: gold; /* or any color you prefer for filled stars */
   }
-  
+
 .empty-star {
     color: #ddd; /* or any color you prefer for empty stars */
 }

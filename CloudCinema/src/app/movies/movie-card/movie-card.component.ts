@@ -46,12 +46,13 @@ export class MovieCardComponent implements OnInit {
     );
   }
 
-  play(movieId: string | undefined, timestamp: number | undefined) {
+  play(movieId: string |  undefined, genres: string[] | undefined, actors: string[] | undefined, timestamp: number | undefined) {
     //pozvati prikaz informacija
     this.userEmail = localStorage.getItem('userEmail') || ""
     const info: WatchInfo = {
       email: this.userEmail,
-      movie_id: movieId
+      genres: genres,
+      actors: actors
     }
     this.movieService.updateWatchHistory(info).subscribe(
       (response: HttpResponse<any>) => {
@@ -63,11 +64,11 @@ export class MovieCardComponent implements OnInit {
     );
     this.router.navigate(["/details", movieId, timestamp]);
 
-    // this.router.navigate(["/play", movieId]);
+    // this.router.navigate(["/play",movieId]);
   }
 
   edit(id: string | undefined, timestamp: number | undefined) {
-    // this.router.navigate(["/movies/movieEdit", id, timestamp]);
+    this.router.navigate(["home/movies/movieEdit", id, timestamp]);
   }
 
   delete(movie: MovieInfo) {

@@ -5,6 +5,7 @@ import {MaterialModule} from "../infrastructure/material/material.module";
 import { HomeComponent } from './home/home.component';
 import {MoviesModule} from "../movies/movies.module";
 import {RouterLink} from "@angular/router";
+import {SeriesModule} from "../series/series.module";
 
 
 
@@ -19,6 +20,7 @@ import {RouterLink} from "@angular/router";
     imports: [
         CommonModule,
         MoviesModule,
+        SeriesModule,
         MaterialModule,
         RouterLink
     ]
