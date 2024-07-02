@@ -38,15 +38,21 @@ export class NavbarComponent implements OnInit{
   }
 
   search() {
-    const name= this.searchForm.value.movieName as string;
-    const actors= this.searchForm.value.actors as string;
-    const director= this.searchForm.value.director as string;
-    const genres= this.searchForm.value.genres as string;
+    let name= this.searchForm.value.movieName as string;
+    let actors= this.searchForm.value.actors as string;
+    let director= this.searchForm.value.director as string;
+    let genres= this.searchForm.value.genres as string;
 
-    const query=name+","+actors+","+director+","+genres
+    if(name!="" && actors!="" && director!="" && genres!=""){  //ako je sve uneo saljemo query
+      const actorsList=actors.split(',').sort()
+      actors=actorsList.join(',')
 
-    if(name=="" && actors=="" && director=="" && genres==""){
-      this.service.getAll().subscribe(value => {
+      const genresList=genres.split(',').sort()
+      genres=genresList.join(',')
+
+      const query=name+","+actors+","+director+","+genres
+
+      this.service.search(query).subscribe(value => {
         this.movies=value;
         console.log(this.movies);
         this.service.setMovies(this.movies)
@@ -54,8 +60,8 @@ export class NavbarComponent implements OnInit{
       },error => {
         console.log("SEARCH ERROR");
       })
-    }else {
-      this.service.search(query).subscribe(value => {
+    }else{ //scan sa params
+      this.service.getAllScan(name,actors,genres,director).subscribe(value => {
         this.movies=value;
         console.log(this.movies);
         this.service.setMovies(this.movies)

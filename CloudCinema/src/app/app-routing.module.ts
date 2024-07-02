@@ -13,7 +13,7 @@ const routes: Routes = [
   {path:"home/movies/movieEdit/:id/:timestamp", component: EditMovieComponent},
   {path:"home",component:HomeComponent},
   {path:'login', component: LoginPageComponent},
-  {path:'details/:id/:timestamp', component: MovieInfoComponent}
+  {path:'details/:id/:timestamp', component: MovieInfoComponent},
   {path:'home/movies/subscription', component: MovieSubscriptionsComponent},
   {path:'play/:id', component: PlayerComponent}
 ]

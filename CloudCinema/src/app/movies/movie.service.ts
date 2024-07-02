@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {MovieInfo, RatingInfo, WatchInfo} from "./models/models.module";
 import {SubscriptionInfo} from "./models/models.module";
-import {catchError, map, Observable, of} from "rxjs";
 import {BehaviorSubject, catchError, map, Observable, of} from "rxjs";
 import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../env/env";
@@ -74,5 +73,15 @@ export class MovieService {
     params = params.append('movie_id', id);
     params = params.append('timestamp', timestamp);
     return this.httpClient.delete<any>(url, {params});
+  }
+
+  getAllScan(name: string, actors: string, genres: string, director: string) {
+    const url = environment.apiHost + 'movies/scan';
+    let params = new HttpParams();
+    params = params.append('movie_name',name);
+    params = params.append('actors', actors);
+    params = params.append('genres', genres);
+    params = params.append('director', director);
+    return this.httpClient.get<MovieInfo[]>(url,{params});
   }
 }
