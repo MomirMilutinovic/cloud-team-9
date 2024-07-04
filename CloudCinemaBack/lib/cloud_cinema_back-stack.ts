@@ -8,6 +8,8 @@ import path = require('path');
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { MovieUploadStepFunction } from './movie_upload_step_function';
 import { MovieDeleteStepFunction } from './movie_delete_step_function';
+import { MovieGenerateFeedStepFunction } from './movie_feed_step_function';
+
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -161,7 +163,6 @@ export class CloudCinemaBackStack extends cdk.Stack {
       handler: authorizeAdminFunction
     });
 
-
     const bucket = new s3.Bucket(this, 'CloudCinemaMoviesBucket', {
       bucketName: 'cloud-cinema-movies-bucket-us', 
       versioned: true, 
@@ -193,7 +194,6 @@ export class CloudCinemaBackStack extends cdk.Stack {
       allowedHeaders: ['*']
     });
 
-
     const movie_info_table = new dynamodb.Table(this, 'CloudCinemaMovieInfoTable', {
       tableName: 'cloud-cinema-movie-info', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
@@ -211,7 +211,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
       writeCapacity:1,
-      // stream:dynamodb.StreamViewType.NEW_IMAGE
+      stream:dynamodb.StreamViewType.NEW_IMAGE
     });
 
     const rating_info_table = new dynamodb.Table(this, 'CloudCinemaRatingInfoTable', {
@@ -241,6 +241,23 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1
     });
 
+    const feed_info_table = new dynamodb.Table(this, 'CloudCinemaFeedInfoTable', {
+      tableName: 'cloud-cinema-feed-info', 
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING},
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,
+      writeCapacity:1
+    });
+
+    const download_history_info_table = new dynamodb.Table(this, 'CloudCinemaDownloadHistoryInfoTable', {
+      tableName: 'cloud-cinema-download-info', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,
+      writeCapacity:1
+    });
+
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
       movieTable: movie_info_table,
@@ -251,6 +268,14 @@ export class CloudCinemaBackStack extends cdk.Stack {
       movieSourceBucket: bucket,
       movieTable: movie_info_table,
       movieOutputBucket: ouptutBucket
+    });
+
+    const movieGenerateFeedStepFunction = new MovieGenerateFeedStepFunction(this, 'MovieGenerateFeedStepFunction', {
+      movieDownloadTable: download_history_info_table,
+      movieRatingTable: rating_info_table,
+      movieSubscriptionTable: subscription_table,
+      movieInfoTable: movie_info_table,
+      movieFeedTable: feed_info_table
     });
 
     const getMovie = new lambda.Function(this, 'GetMovieFunction', {
@@ -269,9 +294,11 @@ export class CloudCinemaBackStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
       timeout: cdk.Duration.seconds(30)
     });
-
+    
     getMovieInfo.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(getMovieInfo);
+    getMovieInfo.addEnvironment("FEED_TABLE_NAME", feed_info_table.tableName)
+    feed_info_table.grantReadData(getMovieInfo);
 
     const startMovieUpload = new lambda.Function(this, 'StartMovieUploadFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
@@ -416,6 +443,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     getMoviesInfo.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(getMoviesInfo);
+    getMoviesInfo.addEnvironment("FEED_TABLE_NAME", feed_info_table.tableName)
+    feed_info_table.grantReadData(getMoviesInfo);
 
     const moviesInfoBase = api.root.addResource('movies_info')
     const getMoviesInfoIntegration = new apigateway.LambdaIntegration(getMoviesInfo);
@@ -575,5 +604,39 @@ export class CloudCinemaBackStack extends cdk.Stack {
     getEpisodes.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     getEpisodes.addEnvironment("INDEX_NAME", "EpisodesIndex")
     movie_info_table.grantReadData(getEpisodes);
+
+    const startGenerateFeed = new lambda.Function(this, 'GenerateFeedFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'start_generate_feed.update_feed', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    const updateDownloadHistory = new lambda.Function(this, 'UpdateDownloadHistoryFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'download_history.update_download_history', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+    
+    updateDownloadHistory.addEnvironment("DOWNLOAD_TABLE_NAME", download_history_info_table.tableName)
+    download_history_info_table.grantWriteData(updateDownloadHistory);
+
+    const downloadHistoryBase = api.root.addResource('update_download_history');
+    const downloadHistoryIntegration = new apigateway.LambdaIntegration(updateDownloadHistory);
+    downloadHistoryBase.addMethod('POST', downloadHistoryIntegration, { 
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    startGenerateFeed.addEventSource(new DynamoEventSource(watch_history_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
+
+    const cfnMovieGenerateFeedStepFunction = movieGenerateFeedStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
+    startGenerateFeed.addEnvironment('STATE_MACHINE_ARN', cfnMovieGenerateFeedStepFunction.attrArn);
+    movieGenerateFeedStepFunction.stateMachine.grantStartExecution(startGenerateFeed);
   }
 }
