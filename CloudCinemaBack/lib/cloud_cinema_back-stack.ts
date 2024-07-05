@@ -301,6 +301,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
       timeout: cdk.Duration.seconds(30)
     });
+
     const scanMovies = new lambda.Function(this, 'ScanMoviesFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'movies_search.get_all_scan', 
@@ -549,5 +550,30 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     updateWatchHistory.addEnvironment("TABLE_NAME", watch_history_table.tableName)
     watch_history_table.grantWriteData(updateWatchHistory);
+
+
+    movie_info_table.addGlobalSecondaryIndex({
+      indexName: 'EpisodesIndex',
+      partitionKey: { name: 'name', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    const getEpisodes = new lambda.Function(this, 'GetEpisodesFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'get_episodes.get_all', 
+      code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    const episodes = moviesInfoBase.addResource('episodes');
+    const getEpisodesIntegration = new apigateway.LambdaIntegration(getEpisodes);
+    episodes.addMethod('GET', getEpisodesIntegration, { 
+      authorizer: userAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO 
+    });
+
+    getEpisodes.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    getEpisodes.addEnvironment("INDEX_NAME", "EpisodesIndex")
+    movie_info_table.grantReadData(getEpisodes);
   }
 }

@@ -1,23 +1,27 @@
 
 <body>
     <div *ngIf="isLoaded" class="container">
+
+      <div id="titlePlayDiv">
         <h1 id="title">{{ movie.name }}</h1>
-        <div class="details">
-            <p id="description">{{ movie.description }}</p>
-            <p><strong>Actors: </strong> <span id="actors">{{ movie.actors }}</span></p>
-            <mat-icon class="actorStarsInput" *ngFor="let icon of maxRatingArrActor; let index=index" (mouseenter)="HandleMouseEnterActor(index)"
-            [ngClass]="{checked:SelectedStarActor>index}" (mouseleave)="HandeMouseLeaveActor()" (click)="RatingActor(index)" >star</mat-icon>
-            <button class="btn play" (click)="RateActors()"><mat-icon>send</mat-icon></button>
+        <button id="playBtn" (click)="Play(movie.id)"><mat-icon>play_circle_outline</mat-icon></button>
+      </div>
+      <div class="details">
+              <p id="description">{{ movie.description }}</p>
+              <p><strong>Actors: </strong> <span id="actors">{{ movie.actors }}</span></p>
+              <mat-icon class="actorStarsInput" *ngFor="let icon of maxRatingArrActor; let index=index" (mouseenter)="HandleMouseEnterActor(index)"
+              [ngClass]="{checked:SelectedStarActor>index}" (mouseleave)="HandeMouseLeaveActor()" (click)="RatingActor(index)" >star</mat-icon>
+              <button class="btn play" (click)="RateActors()"><mat-icon>send</mat-icon></button>
 
-            <p><strong>Genres: </strong> <span id="genres">{{ movie.genres }}</span></p>
-            <mat-icon class="genreStarsInput" *ngFor="let icon of maxRatingArrGenre; let index=index" (mouseenter)="HandleMouseEnterGenre(index)"
-            [ngClass]="{checked:SelectedStarGenre>index}" (mouseleave)="HandeMouseLeaveGenre()" (click)="RatingGenre(index)" >star</mat-icon>
-            <button class="btn play" (click)="RateGenres()"><mat-icon>send</mat-icon></button>
+              <p><strong>Genres: </strong> <span id="genres">{{ movie.genres }}</span></p>
+              <mat-icon class="genreStarsInput" *ngFor="let icon of maxRatingArrGenre; let index=index" (mouseenter)="HandleMouseEnterGenre(index)"
+              [ngClass]="{checked:SelectedStarGenre>index}" (mouseleave)="HandeMouseLeaveGenre()" (click)="RatingGenre(index)" >star</mat-icon>
+              <button class="btn play" (click)="RateGenres()"><mat-icon>send</mat-icon></button>
 
-            <p><strong>Directors: </strong> <span id="directors">{{ movie.director }}</span></p>
-            <mat-icon class="directorStarsInput" *ngFor="let icon of maxRatingArrDirector; let index=index" (mouseenter)="HandleMouseEnterDirector(index)"
-            [ngClass]="{checked:SelectedStarDirector>index}" (mouseleave)="HandeMouseLeaveDirector()" (click)="RatingDirector(index)" >star</mat-icon>
-            <button class="btn play" (click)="RateDirectors()"><mat-icon>send</mat-icon></button>
-        </div>
+              <p><strong>Directors: </strong> <span id="directors">{{ movie.director }}</span></p>
+              <mat-icon class="directorStarsInput" *ngFor="let icon of maxRatingArrDirector; let index=index" (mouseenter)="HandleMouseEnterDirector(index)"
+              [ngClass]="{checked:SelectedStarDirector>index}" (mouseleave)="HandeMouseLeaveDirector()" (click)="RatingDirector(index)" >star</mat-icon>
+              <button class="btn play" (click)="RateDirectors()"><mat-icon>send</mat-icon></button>
+          </div>
     </div>
 </body>

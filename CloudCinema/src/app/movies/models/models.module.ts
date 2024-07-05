@@ -1,6 +1,7 @@
 export interface MovieInfo{
   id?:string;
   name?:string;
+  episode?:string;
   description?:string;
   genres?:string[];
   actors?:string[];
@@ -18,7 +19,8 @@ export interface SubscriptionInfo{
 
 export interface WatchInfo{
   email: string;
-  movie_id?:string;
+  genres?:string[];
+  actors?:string[];
 }
 
 export interface RatingInfo{

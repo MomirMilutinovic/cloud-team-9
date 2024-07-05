@@ -36,6 +36,8 @@ def start_delete_movie(event, context):
             'name': item.get('name'),
             'director': item.get('director'),
             'actors': item.get('actors'),
+            'genres': item.get('genres'),
+            'episode': item.get('episode'),
             'year': item.get('year'),
             'timestamp': int(timestamp),
         }

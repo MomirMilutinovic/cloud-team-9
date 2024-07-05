@@ -10,6 +10,8 @@ import { MovieInfoComponent } from './movie-info/movie-info.component';
 import { MovieSubscriptionsComponent } from './movie-subscriptions/movie-subscriptions.component';
 import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
+import {SeriesModule} from "../series/series.module";
+import {MaterialModule} from "../infrastructure/material/material.module";
 
 
 
@@ -29,8 +31,7 @@ import {MatButtonModule} from "@angular/material/button";
     MatIconModule,
     ReactiveFormsModule,
     RouterLink,
-    MatTableModule,
-    MatButtonModule
+    MaterialModule
   ]
 })
 export class MoviesModule { }

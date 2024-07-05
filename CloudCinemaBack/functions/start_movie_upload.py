@@ -23,7 +23,8 @@ def start_movie_upload(event, context):
         director = request_body['director']
         actors = request_body['actors']
         year = request_body['year']
-        genres=request_body['genres']
+        genres = request_body['genres']
+        episode = request_body['episode']
         id = uuid.uuid4()
 
         table = dynamodb.Table(table_name)
@@ -35,6 +36,7 @@ def start_movie_upload(event, context):
                 'actors': actors,
                 'genres':genres,
                 'year': year,
+                'episode': episode,
                 'timestamp': timestamp,
                 'pending': True
             }
@@ -61,7 +63,6 @@ def start_movie_upload(event, context):
         response_body = {
                 'movie': json.dumps(request_body, default=str),
                 'uploadUrl': presigned_url
-
         }
 
         step_function_input = {

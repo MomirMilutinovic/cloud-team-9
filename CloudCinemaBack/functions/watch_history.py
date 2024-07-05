@@ -14,7 +14,11 @@ def put_item(event, context):
     try:
         request_body = json.loads(event['body'])
         email = request_body['email']
-        movie_id = request_body['movie_id']
+        # movie_id = request_body['movie_id']
+        # movie_timestamp = request_body['movie_id']
+        genres = request_body['genres']
+        actors = request_body['actors']
+
         id = uuid.uuid4()
         timestamp = int(time.time())
 
@@ -24,7 +28,8 @@ def put_item(event, context):
                 'id': str(id),
                 'timestamp': timestamp,
                 'email': email,
-                'movie_id': movie_id
+                'genres': genres,
+                'actors':  actors
             }
         )
         return {

@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import {Observable, range, toArray} from "rxjs";
 import { MovieService } from '../movie.service';
 import { MovieInfo, RatingInfo } from '../models/models.module';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-movie-info',
@@ -34,7 +34,7 @@ export class MovieInfoComponent {
   previouseSelectedDirector = 0;
   isLoaded:boolean = false;
 
-  constructor(private route: ActivatedRoute, private service: MovieService) {}
+  constructor(private route: ActivatedRoute, private service: MovieService,private router:Router) {}
 
 
   ngOnInit(): void {
@@ -55,7 +55,7 @@ export class MovieInfoComponent {
     // @ts-ignore
     this.maxRatingArrGenre = Array(this.maxRatingGenre).fill(0);
 
-   } 
+   }
 
   HandeMouseLeaveActor() {
     if (this.previouseSelectedActor!==0){
@@ -158,5 +158,10 @@ export class MovieInfoComponent {
         }
       }
     );
+  }
+
+  Play(id: string | undefined) {
+    this.router.navigate(["/play",id]);
+
   }
 }

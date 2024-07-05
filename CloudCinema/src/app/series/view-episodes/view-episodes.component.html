@@ -1,0 +1,9 @@
+<div class="movie-container-wrapper">
+  <div class="movie-container">
+    <div *ngFor="let episode of episodes">
+      <app-movie-card [movie]="episode"></app-movie-card>
+    </div>
+  </div>
+  <div class="arrow left-arrow" (click)="scrollLeft()"><mat-icon>keyboard_arrow_left</mat-icon></div>
+  <div class="arrow right-arrow" (click)="scrollRight()"><mat-icon>keyboard_arrow_right</mat-icon></div>
+</div>

@@ -3,6 +3,9 @@ import {MovieInfo} from "../../movies/models/models.module";
 import {SubscriptionInfo} from "../../movies/models/models.module";
 import {getDownlevelDecoratorsTransform} from "@angular/compiler-cli/src/transformers/downlevel_decorators_transform";
 import {MovieService} from "../../movies/movie.service";
+import {MimetypesKind} from "video.js/dist/types/utils/mimetypes";
+import mov = MimetypesKind.mov;
+import {MoviesModule} from "../../movies/movies.module";
 
 @Component({
   selector: 'app-home',
@@ -11,18 +14,41 @@ import {MovieService} from "../../movies/movie.service";
 })
 export class HomeComponent implements OnInit{
   movies: MovieInfo[] = [];
+  allSeries: MovieInfo[] = [];
   constructor(private movieService:MovieService) {}
 
   ngOnInit(): void {
+    this.movieService.getMovies().subscribe(movies => {
+      this.movies=this.getMovies(movies)
+      this.allSeries =this.getSeries(movies);
+    });
     this.movieService.getAll().subscribe(value => {
-      this.movies=value;
-      this.movieService.setMovies(this.movies);
-      this.movieService.getMovies().subscribe(movies => {
-        this.movies = movies;
-      });
+      this.movieService.setMovies(value);
     },error => {
       console.error('Error fetching movies:', error);
     });
+  }
+  getMovies(movies: MovieInfo[]) {
+    const allMovies = [];
+    for (const movie of movies) {
+      if (movie.episode == null) {
+        allMovies.push(movie);
+      }
+    }
+    return allMovies;
+  }
+  getSeries(movies: MovieInfo[]) {
+    const allSeries = [];
+    const names:string[]=[]
+    for (const movie of movies) {
+      // @ts-ignore
+      if (movie.episode != null && !names.includes(movie.name)) {
+        allSeries.push(movie);
+        // @ts-ignore
+        names.push(movie.name)
+      }
+    }
+    return allSeries;
   }
 
   scrollLeft(): void {

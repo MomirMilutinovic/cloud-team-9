@@ -23,6 +23,7 @@ export class MovieService {
     this.moviesSubject.next(movies);
   }
 
+
   getAll(): Observable<MovieInfo[]> {
     const url = environment.apiHost + 'movies_info';
     return this.httpClient.get<any[]>(url);
@@ -83,5 +84,11 @@ export class MovieService {
     params = params.append('genres', genres);
     params = params.append('director', director);
     return this.httpClient.get<MovieInfo[]>(url,{params});
+  }
+  getEpisodes(name: string): Observable<MovieInfo[]>  {
+    const url = environment.apiHost + 'movies_info/episodes';
+    let params = new HttpParams();
+    params = params.append('series_name', name);
+    return this.httpClient.get<MovieInfo[]>(url, { params });
   }
 }
