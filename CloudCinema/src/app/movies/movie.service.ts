@@ -24,9 +24,11 @@ export class MovieService {
   }
 
 
-  getAll(): Observable<MovieInfo[]> {
+  getAll(email:string): Observable<MovieInfo[]> {
     const url = environment.apiHost + 'movies_info';
-    return this.httpClient.get<any[]>(url);
+    let params = new HttpParams();
+    params = params.append('email', email);
+    return this.httpClient.get<any[]>(url,{params});
   }
 
   getMovieInfo(id: string,timestamp:number): Observable<MovieInfo>  {
@@ -50,6 +52,10 @@ export class MovieService {
 
   updateWatchHistory(info: WatchInfo): Observable<HttpResponse<any>>  {
     const url = environment.apiHost + 'update_watch_history';
+    return this.httpClient.post<any>(url, info);
+  }
+  updateDownloadHistory(info: WatchInfo): Observable<HttpResponse<any>>  {
+    const url = environment.apiHost + 'update_download_history';
     return this.httpClient.post<any>(url, info);
   }
 

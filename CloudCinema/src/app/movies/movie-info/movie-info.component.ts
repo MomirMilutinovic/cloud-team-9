@@ -1,8 +1,11 @@
 import { Component, Input } from '@angular/core';
 import {Observable, range, toArray} from "rxjs";
 import { MovieService } from '../movie.service';
-import { MovieInfo, RatingInfo } from '../models/models.module';
+import {MovieInfo, RatingInfo, WatchInfo} from '../models/models.module';
 import {ActivatedRoute, Router} from '@angular/router';
+import {HttpResponse} from "@angular/common/http";
+import {MimetypesKind} from "video.js/dist/types/utils/mimetypes";
+import mov = MimetypesKind.mov;
 
 @Component({
   selector: 'app-movie-info',
@@ -160,8 +163,24 @@ export class MovieInfoComponent {
     );
   }
 
-  Play(id: string | undefined) {
-    this.router.navigate(["/play",id]);
+  Play(movie:MovieInfo) {
+
+    const userEmail = localStorage.getItem('userEmail') || ""
+    const info: WatchInfo = {
+      email: userEmail,
+      genres: movie.genres,
+      actors: movie.actors
+    }
+    this.service.updateWatchHistory(info).subscribe(
+      (response: HttpResponse<any>) => {
+        console.log("SUCCESS!")
+      },
+      error => {
+        console.error('Error:', error);
+      }
+    );
+
+    this.router.navigate(["/play",movie.id]);
 
   }
 }

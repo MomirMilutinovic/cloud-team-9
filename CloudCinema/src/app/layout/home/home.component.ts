@@ -19,14 +19,31 @@ export class HomeComponent implements OnInit{
 
   ngOnInit(): void {
     this.movieService.getMovies().subscribe(movies => {
+      // this.separateContent(movies)
       this.movies=this.getMovies(movies)
       this.allSeries =this.getSeries(movies);
     });
-    this.movieService.getAll().subscribe(value => {
+    const email=localStorage.getItem('userEmail') || ''
+    // @ts-ignore
+    this.movieService.getAll(email).subscribe(value => {
       this.movieService.setMovies(value);
     },error => {
       console.error('Error fetching movies:', error);
     });
+  }
+
+  separateContent(contents: MovieInfo[]) {
+    const allMovies = [];
+    const allSeries = [];
+    for (const content of contents) {
+      if (content.episode == null) {
+        allMovies.push(content);
+      }else{
+        allSeries.push(content)
+      }
+    }
+    this.allSeries=allSeries
+    this.movies=allMovies
   }
   getMovies(movies: MovieInfo[]) {
     const allMovies = [];
@@ -35,7 +52,7 @@ export class HomeComponent implements OnInit{
         allMovies.push(movie);
       }
     }
-    return allMovies;
+    return allMovies
   }
   getSeries(movies: MovieInfo[]) {
     const allSeries = [];
