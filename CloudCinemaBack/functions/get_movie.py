@@ -4,13 +4,14 @@ import boto3
 import base64
 
 
-
 bucket_name = os.environ['BUCKET_NAME']
 s3 = boto3.client('s3')
+
 
 def get_one(event, context):
     try:
         movie_id= event['pathParameters']['movie_id']
+        
         presigned_url = s3.generate_presigned_url('get_object', Params={
             'Bucket': bucket_name,
             'Key': movie_id,
@@ -28,7 +29,3 @@ def get_one(event, context):
             'statusCode': 404,
             'body': 'Error: {}'.format(str(e))
         }
-
-
-
-

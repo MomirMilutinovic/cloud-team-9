@@ -22,12 +22,13 @@ def get_all(event, context):
             KeyConditionExpression=Key('attributes').eq(params))
         
         if 'Items' in response:
-            movie_ids_timestamps = response['Items']
-            for item in movie_ids_timestamps:
-                second_response = table.get_item(Key={'id': item['id'],'timestamp':int(item['timestamp'])})
-                if 'Item' in second_response:
-                    movie = second_response['Item']
-                    found_movies.append(movie)
+            # movie_ids_timestamps = response['Items']
+            item = response['Items'][0]
+            # for item in movie_ids_timestamps:
+            second_response = table.get_item(Key={'id': item['id'],'timestamp':int(item['timestamp'])})
+            if 'Item' in second_response:
+                movie = second_response['Item']
+                found_movies.append(movie)
         
         return {
             'statusCode': 200,

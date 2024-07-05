@@ -25,17 +25,31 @@ export class MovieCardComponent implements OnInit {
     this.authService.isAdmin().then((isAdmin) => this.editDisabled = !isAdmin)
   }
 
-  download(movieId: string | undefined) {
+  download(movie:MovieInfo) {
+    const userEmail = localStorage.getItem('userEmail') || ""
+    const info: WatchInfo = {
+      email: userEmail,
+      genres: movie.genres,
+      actors: movie.actors
+    }
+    this.movieService.updateDownloadHistory(info).subscribe(
+      (response: HttpResponse<any>) => {
+        console.log("SUCCESS!")
+      },
+      error => {
+        console.error('Error:', error);
+      }
+    );
     // @ts-ignore
-    this.movieService.getMovie(movieId).subscribe(
+    this.movieService.getMovie(movie.id).subscribe(
       (response: HttpResponse<any>) => {
         let dataType = response.type;
         let binaryData = [];
         binaryData.push(response.body);
         let downloadLink = document.createElement('a');
         downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, {type: dataType.toString()}));
-        if (movieId)
-            downloadLink.setAttribute('download', movieId);
+        if (movie.id)
+            downloadLink.setAttribute('download', movie.id);
         document.body.appendChild(downloadLink);
         downloadLink.click();
         downloadLink.parentNode?.removeChild(downloadLink);
@@ -46,22 +60,9 @@ export class MovieCardComponent implements OnInit {
     );
   }
 
-  play(movieId: string |  undefined, genres: string[] | undefined, actors: string[] | undefined, timestamp: number | undefined) {
+  play(movieId: string |  undefined, timestamp: number | undefined) {
     //pozvati prikaz informacija
-    this.userEmail = localStorage.getItem('userEmail') || ""
-    const info: WatchInfo = {
-      email: this.userEmail,
-      genres: genres,
-      actors: actors
-    }
-    this.movieService.updateWatchHistory(info).subscribe(
-      (response: HttpResponse<any>) => {
-        console.log("SUCCESS!")
-      },
-      error => {
-        console.error('Error:', error);
-      }
-    );
+
     this.router.navigate(["/details", movieId, timestamp]);
 
     // this.router.navigate(["/play",movieId]);
