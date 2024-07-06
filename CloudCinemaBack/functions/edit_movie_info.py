@@ -6,6 +6,7 @@ import base64
 
 
 table_name = os.environ['TABLE_NAME']
+search_table_name = os.environ['SEARCH_TABLE_NAME']
 dynamodb = boto3.resource('dynamodb')
 
 
@@ -32,6 +33,7 @@ def edit_one(event, context):
         episode = request_body['episode']
 
         table = dynamodb.Table(table_name)
+        search_table = dynamodb.Table(search_table_name)
 
         response = table.update_item(
             Key={
@@ -54,6 +56,30 @@ def edit_one(event, context):
                 ':year': year,
                 ':genres': genres,
                 ':episode': episode
+            },
+            ReturnValues='ALL_NEW'
+        )
+        
+        actors.sort()
+        genres.sort()
+        actors_list=",".join(actors)
+        genres_list=",".join(genres)
+        attributes=name+","+actors_list+","+director+","+genres_list
+        response = search_table.update_item(
+            Key={
+                'id': id,
+                'timestamp': timestamp
+            },
+            UpdateExpression='SET #attributes = :attributes, #actors = :actors, #genres = :genres',
+            ExpressionAttributeNames={
+                '#attributes': 'attributes',
+                '#actors': 'actors',
+                '#genres': 'genres',
+            },
+            ExpressionAttributeValues={
+                ':attributes': attributes,
+                ':actors': actors_list,
+                ':genres': genres_list,
             },
             ReturnValues='ALL_NEW'
         )

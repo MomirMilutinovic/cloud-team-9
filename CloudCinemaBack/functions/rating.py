@@ -12,10 +12,12 @@ dynamodb = boto3.resource('dynamodb')
 def rate(event, context):
     try:
         request_body = json.loads(event['body'])
-        type = request_body['type']
+        # type = request_body['type']
         email = request_body['email']
         rate = int(request_body['rate'])
-        attr = request_body['attributes']
+        actors = request_body['actors']
+        genres = request_body['genres']
+        # attr = request_body['attributes']
         id = uuid.uuid4()
         timestamp = int(time.time())
 
@@ -25,11 +27,24 @@ def rate(event, context):
                 'id': str(id),
                 'timestamp': timestamp,
                 'email': email,
-                'type': type,
+                'type': 'Actor',
                 'rate': rate,
-                'attr': attr
+                'attr': actors
             }
         )
+        id = uuid.uuid4()
+        timestamp = int(time.time())
+        response = table.put_item(
+            Item={
+                'id': str(id),
+                'timestamp': timestamp,
+                'email': email,
+                'type': 'Genre',
+                'rate': rate,
+                'attr': genres
+            }
+        )
+        
         return {
             'statusCode': 200,
             'headers': {

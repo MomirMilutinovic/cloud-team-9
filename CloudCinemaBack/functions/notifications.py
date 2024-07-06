@@ -78,7 +78,7 @@ def write_to_dynamo(email,type,sub):
                 'timestamp': timestamp,
                 'email':email,
                 'type':type,
-                'subscription':sub      #promeni da je pismeno i na frontu i ovde
+                'subscription':sub      
             }
         )
     
@@ -109,7 +109,7 @@ def get_subscriptions(event,context):
         }
 
     
-def delete_subscription(event,context):
+def delete_subscription(event,context):  
     try:
         table = dynamodb.Table(subscription_table)
         email = event['queryStringParameters']['email']
@@ -148,7 +148,8 @@ def delete_subscription(event,context):
         }
     
 
-def unsubscribe(email,topic):
+def unsubscribe(email,topic): 
+    topic = topic.replace(" ", "_")
     topicArn=get_existing_topic(topic)
     if topicArn is not None:
         subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=topicArn)
@@ -159,6 +160,7 @@ def unsubscribe(email,topic):
 
                 
 def get_or_create_topic(topic_name):
+    topic_name = topic_name.replace(" ", "_")
     topics = sns_client.list_topics()
     for topic in topics['Topics']:
         if topic_name in topic['TopicArn']:
@@ -168,6 +170,7 @@ def get_or_create_topic(topic_name):
     return response['TopicArn']
 
 def get_existing_topic(topic_name):
+    topic_name = topic_name.replace(" ", "_")
     topics = sns_client.list_topics()
     for topic in topics['Topics']:
         if topic_name in topic['TopicArn']:

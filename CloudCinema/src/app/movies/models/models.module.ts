@@ -25,9 +25,9 @@ export interface WatchInfo{
 
 export interface RatingInfo{
   email: string;
-  type: string;
   rate: number;
-  attributes?: string[];
+  genres?: string[];
+  actors?: string[];
 }
 
 export interface Subscription{

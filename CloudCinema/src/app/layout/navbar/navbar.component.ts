@@ -61,6 +61,13 @@ export class NavbarComponent implements OnInit{
         console.log("SEARCH ERROR");
       })
     }else{ //scan sa params
+      if(actors){
+        const actorsList=actors.split(',').sort()
+        actors=actorsList.join(',')
+      }if(genres){
+        const genresList=genres.split(',').sort()
+        genres=genresList.join(',')
+      }
       this.service.getAllScan(name,actors,genres,director).subscribe(value => {
         this.movies=value;
         console.log(this.movies);

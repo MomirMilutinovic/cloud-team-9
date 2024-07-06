@@ -1,10 +1,11 @@
 import os
 import boto3
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Attr, Key
 import json
 import logging
 
 table_info_name = os.environ['MOVIE_TABLE_NAME']
+index_name=os.environ['INDEX_NAME']
 table_download_name = os.environ['MOVIE_DOWNLOAD_TABLE_NAME']
 dynamodb = boto3.resource('dynamodb')
 
@@ -16,12 +17,13 @@ def from_download(event, context):
         table_download = dynamodb.Table(table_download_name)
         table_info= dynamodb.Table(table_info_name)
 
-        response = table_download.scan(
-            FilterExpression=Attr('email').eq(email)
-        )
+        response = table_download.query(
+            IndexName=index_name,
+            KeyConditionExpression=Key('email').eq(email))
+
         items = response['Items'] # {'email', [genres], [actros], 'timestamp'} ,{'email', [genres], [actros], 'timestamp'}} , {'email', [genres], [actros], 'timestamp'}
         # items = sorted(items, key=lambda x: x['timestamp'], reverse=True)[:3]
-        items = sorted(items, key=lambda x: x['timestamp'], reverse=True)
+        items = sorted(items, key=lambda x: x['timestamp'], reverse=True)[:3]
 
         genres = []
         actors = []
@@ -35,11 +37,12 @@ def from_download(event, context):
         
         all_movies = all_movies_items['Items']
 
+        print("Download actors")
+        print(actors)
+
         movie_score = {}
 
         for movie in all_movies:
-            logging.debug(f"Movie: {movie['actors']}")
-
             score = len(set(movie['actors']).intersection(set(actors))) * 5
             score += len(set(movie['genres']).intersection(set(genres))) * 5
             movie_score[movie['id']] = score

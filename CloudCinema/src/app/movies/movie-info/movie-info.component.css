@@ -13,8 +13,15 @@ body {
   display: flex;
 }
 #playBtn{
-  margin-top: 30px;
+  background-color: rgb(113, 146, 178);
+  font-size: 20px;
+  margin-top: 10px;
+  width: 100px;
   height: 50px;
+}
+#playDiv{
+  width: 100%;
+  text-align: right;
 }
 
 
