@@ -19,12 +19,14 @@ export interface SubscriptionInfo{
 
 export interface WatchInfo{
   email: string;
+  movie_id?:string;
   genres?:string[];
   actors?:string[];
 }
 
 export interface RatingInfo{
   email: string;
+  movie_id?:string;
   rate: number;
   genres?: string[];
   actors?: string[];

@@ -225,6 +225,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1,
       stream:dynamodb.StreamViewType.NEW_IMAGE
     });
+    
+    watch_history_table.addGlobalSecondaryIndex({
+      indexName: 'WatchHistoryIndex',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
 
     const rating_info_table = new dynamodb.Table(this, 'CloudCinemaRatingInfoTable', {
       tableName: 'cloud-cinema-rating-info', 
@@ -610,6 +616,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     rateMovie.addEnvironment("TABLE_NAME", rating_info_table.tableName)
     rating_info_table.grantWriteData(rateMovie);
+    rateMovie.addEnvironment("WATCH_HISTORY_TABLE_NAME", watch_history_table.tableName)
+    rateMovie.addEnvironment("INDEX_NAME", 'WatchHistoryIndex')
+    watch_history_table.grantReadData(rateMovie);
 
 
     const updateWatchHistory = new lambda.Function(this, 'UpdateWatchHistoryFunction', {

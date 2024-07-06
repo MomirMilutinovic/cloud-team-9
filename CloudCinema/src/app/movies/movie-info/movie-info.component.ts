@@ -6,6 +6,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {HttpResponse} from "@angular/common/http";
 import {MimetypesKind} from "video.js/dist/types/utils/mimetypes";
 import mov = MimetypesKind.mov;
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-movie-info',
@@ -27,7 +28,8 @@ export class MovieInfoComponent {
   previouseSelectedDirector = 0;
   isLoaded:boolean = false;
 
-  constructor(private route: ActivatedRoute, private service: MovieService,private router:Router) {}
+  constructor(private route: ActivatedRoute, private service: MovieService,private router:Router,
+              private snackBar: MatSnackBar) {}
 
 
   ngOnInit(): void {
@@ -67,6 +69,7 @@ export class MovieInfoComponent {
     if (rate>0) {
       const ratingInfo : RatingInfo = {
         email: userEmail,
+        movie_id:this.movie.id,
         rate: rate,
         genres:this.movie.genres,
         actors:this.movie.actors
@@ -76,14 +79,25 @@ export class MovieInfoComponent {
         {
           next: () => {
             console.log('success!')
+            this.snackBar.open("Movie rated!", 'Close', {
+              duration: 3000,
+            });
           },
-          error: (_) => {
+          error: (error) => {
+            console.log(error.status)
+            if(error.status==404){
+              this.snackBar.open("You cannot rate a movie you have not watched!", 'Close', {
+                duration: 3000
+              });
+            }
             console.log("error")
           }
         }
       );
     }else{
-      //poruka selektuj zvezdice
+      this.snackBar.open("Please select how many stars you want to give this movie!", 'Close', {
+        duration: 3000
+      });
     }
   }
 
@@ -92,6 +106,7 @@ export class MovieInfoComponent {
     const userEmail = localStorage.getItem('userEmail') || ""
     const info: WatchInfo = {
       email: userEmail,
+      movie_id:movie.id,
       genres: movie.genres,
       actors: movie.actors
     }

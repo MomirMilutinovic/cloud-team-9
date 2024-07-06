@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit{
     const allSeries = [];
     const names:string[]=[]
     for (const content of contents) {
-      if (content.episode == null) {
+      if (content.episode == "") {
         allMovies.push(content);
         // @ts-ignore
       }else if(!names.includes(content.name)){

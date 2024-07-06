@@ -18,6 +18,8 @@ def put_item(event, context):
         # movie_timestamp = request_body['movie_id']
         genres = request_body['genres']
         actors = request_body['actors']
+        movie_id = request_body['movie_id']
+
 
         id = uuid.uuid4()
         timestamp = int(time.time())
@@ -29,7 +31,8 @@ def put_item(event, context):
                 'timestamp': timestamp,
                 'email': email,
                 'genres': genres,
-                'actors':  actors
+                'actors':  actors,
+                'movie_id':movie_id
             }
         )
         return {

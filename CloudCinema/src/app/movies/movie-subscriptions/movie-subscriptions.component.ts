@@ -5,6 +5,7 @@ import {MovieService} from "../movie.service";
 import {SubscriptionsService} from "./subscriptions.service";
 import {HttpResponse} from "@angular/common/http";
 import {MatTableDataSource} from "@angular/material/table";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 
 @Component({
@@ -18,7 +19,7 @@ export class MovieSubscriptionsComponent implements OnInit{
   dataSource = new MatTableDataSource<Subscription>([]);
   displayedColumns: string[] = ['type', 'subscription', 'delete'];
 
-  constructor(private fb:FormBuilder,private movieService:MovieService,private subService:SubscriptionsService) {
+  constructor(private snackBar:MatSnackBar,private fb:FormBuilder,private movieService:MovieService,private subService:SubscriptionsService) {
   }
 
   ngOnInit(): void {
@@ -66,7 +67,13 @@ export class MovieSubscriptionsComponent implements OnInit{
 
     this.subService.subscribeSNS(subscription).subscribe(value => {
       console.log("Successful subscription!")
+      this.snackBar.open("Subscription sent!", 'Close', {
+        duration: 3000,
+      });
     },error => {
+      this.snackBar.open("Error during subscription!", 'Close', {
+        duration: 3000,
+      });
       console.log("Error during subscription!")
     });
   }
@@ -78,23 +85,10 @@ export class MovieSubscriptionsComponent implements OnInit{
       this.dataSource.data = data;
     },error: (_) => {
         console.log("Error fetching data");
+
       }
     });
   }
-
-  // delete() {
-  //   // @ts-ignore
-  //   const email=localStorage.getItem("userEmail").toString() || '';
-  //
-  //   this.subService.delete(email,"Actor-Glumac1").subscribe(
-  //     (response: HttpResponse<any>) => {
-  //       console.log("SUCCESS!")
-  //     },
-  //     error => {
-  //       console.error('Error:', error);
-  //     }
-  //   );
-  // }
   deleteSub(sub:Subscription) {
     let deleteSub=""
     if(sub.type=="Director"){
@@ -109,9 +103,15 @@ export class MovieSubscriptionsComponent implements OnInit{
     this.subService.delete(email,deleteSub).subscribe(
       (response: HttpResponse<any>) => {
         console.log("SUCCESS!")
+        this.snackBar.open("Subscription deleted!", 'Close', {
+          duration: 3000,
+        });
         this.getAll()
       },
       error => {
+        this.snackBar.open("Error during deleting subscription!", 'Close', {
+          duration: 3000,
+        });
         console.error('Error:', error);
       }
     );

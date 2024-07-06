@@ -11,7 +11,6 @@ h1{
   margin-left: 30px;
   margin-top: 30px;
   color: rgb(113, 146, 178);
-  text-shadow: 3px 3px rgba(37, 37, 37, 0.63);
 }
 .movie-container-wrapper, .series-container-wrapper {
   position: relative;
