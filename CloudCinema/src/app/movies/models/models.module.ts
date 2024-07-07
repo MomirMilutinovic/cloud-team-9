@@ -40,3 +40,7 @@ export interface Subscription{
   subscription?:string
 }
 
+export interface PresignedUrl {
+  uploadUrl: string;
+}
+

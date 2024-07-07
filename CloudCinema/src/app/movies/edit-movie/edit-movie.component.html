@@ -21,5 +21,8 @@
   <label>Episode:</label>
   <input type="text" formControlName="episode" />
 
+  <label>Video (optional):</label>
+  <input type="file" (change)="onFileSelected($event)"/>
+
   <button (click)="onSave()" type="submit">Save</button>
 </form>

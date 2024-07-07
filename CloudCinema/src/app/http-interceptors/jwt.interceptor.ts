@@ -23,7 +23,10 @@ export class JWTInterceptor implements HttpInterceptor {
   async handle(req: HttpRequest<any>, next: HttpHandler) {
     let idToken = (await this.authService.getIdToken());
 
-    if (req.headers.get('skip')) return lastValueFrom(next.handle(req));
+    if (req.headers.get('skip')) {
+      req.headers.delete('skip');
+      return lastValueFrom(next.handle(req));
+    }
 
 
     if (idToken) {

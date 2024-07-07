@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {MovieInfo, RatingInfo, WatchInfo} from "./models/models.module";
+import {MovieInfo, PresignedUrl, RatingInfo, WatchInfo} from "./models/models.module";
 import {SubscriptionInfo} from "./models/models.module";
-import {BehaviorSubject, catchError, map, Observable, of} from "rxjs";
+import {BehaviorSubject, catchError, map, Observable, of, switchMap, tap} from "rxjs";
 import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../env/env";
 
@@ -97,5 +97,31 @@ export class MovieService {
     let params = new HttpParams();
     params = params.append('series_name', name);
     return this.httpClient.get<MovieInfo[]>(url, { params });
+  }
+
+  uploadFile(presignedUrl: string, file: File) {
+    return this.httpClient.put(presignedUrl, file, {
+      headers: {
+        'skip': 'true',
+        'Content-Type': 'application/octet-stream'
+      }
+    });
+  }
+
+
+  editMovieFile(id: string, file: File) {
+    const movieFileEditUrl = environment.apiHost + 'movie_file';
+    return this.httpClient.put<PresignedUrl>(movieFileEditUrl, {id}).pipe(
+      switchMap(
+        response => {
+          console.log('Uploading film', response.uploadUrl);
+          return this.uploadFile(response.uploadUrl, file);
+        }
+      ),
+      catchError(error => {
+        console.error('Error getting presigned URL:', error);
+        return of(null);
+      })
+    )
   }
 }
