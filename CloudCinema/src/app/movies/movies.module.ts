@@ -12,6 +12,7 @@ import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
 import {SeriesModule} from "../series/series.module";
 import {MaterialModule} from "../infrastructure/material/material.module";
+import { CreateMovieComponent } from './create-movie/create-movie.component';
 
 
 
@@ -21,7 +22,8 @@ import {MaterialModule} from "../infrastructure/material/material.module";
     EditMovieComponent,
     PlayerComponent,
     MovieInfoComponent,
-    MovieSubscriptionsComponent
+    MovieSubscriptionsComponent,
+    CreateMovieComponent
   ],
   exports: [
     MovieCardComponent

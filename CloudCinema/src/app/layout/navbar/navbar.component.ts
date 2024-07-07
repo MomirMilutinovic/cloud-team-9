@@ -18,6 +18,7 @@ export class NavbarComponent implements OnInit{
   ];
   searchForm: FormGroup;
   movies:MovieInfo[];
+  isAdmin = false;
 
 
 
@@ -32,7 +33,14 @@ export class NavbarComponent implements OnInit{
       genres:[''],
       director:['']
     });
-    }
+    this.authService.isAdmin().then(
+      isAdmin => {
+        if (isAdmin) {
+          this.isAdmin = true;
+        }
+      }
+    );
+  }
 
   signOut() {
     this.authService.signOut();

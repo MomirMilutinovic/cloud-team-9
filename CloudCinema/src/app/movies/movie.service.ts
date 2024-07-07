@@ -10,7 +10,6 @@ import {environment} from "../../env/env";
 })
 export class MovieService {
 
-
   constructor(private httpClient:HttpClient) { }
 
   private moviesSubject = new BehaviorSubject<MovieInfo[]>([]);
@@ -92,6 +91,7 @@ export class MovieService {
     params = params.append('description', description);
     return this.httpClient.get<MovieInfo[]>(url,{params});
   }
+
   getEpisodes(name: string): Observable<MovieInfo[]>  {
     const url = environment.apiHost + 'movies_info/episodes';
     let params = new HttpParams();
@@ -108,7 +108,6 @@ export class MovieService {
     });
   }
 
-
   editMovieFile(id: string, file: File) {
     const movieFileEditUrl = environment.apiHost + 'movie_file';
     return this.httpClient.put<PresignedUrl>(movieFileEditUrl, {id}).pipe(
@@ -123,5 +122,21 @@ export class MovieService {
         return of(null);
       })
     )
+  }
+
+  uploadMovie(movie: MovieInfo, file: File) {
+    const movieInfoUploadUrl = environment.apiHost + '/movies'
+    return this.httpClient.post<PresignedUrl>(movieInfoUploadUrl, movie).pipe(
+      switchMap(
+        response => {
+          console.log('Uploading film', response.uploadUrl);
+          return this.uploadFile(response.uploadUrl, file);
+        }
+      ),
+      catchError(error => {
+        console.error('Error getting presigned URL:', error);
+        return of(null);
+      })
+    );
   }
 }

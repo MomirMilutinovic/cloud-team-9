@@ -8,6 +8,7 @@ import { PlayerComponent } from './movies/player/player.component';
 import { MovieInfoComponent } from './movies/movie-info/movie-info.component';
 import {MovieSubscriptionsComponent} from "./movies/movie-subscriptions/movie-subscriptions.component";
 import {ViewEpisodesComponent} from "./series/view-episodes/view-episodes.component";
+import { CreateMovieComponent } from './movies/create-movie/create-movie.component';
 
 const routes: Routes = [
   {path: '', redirectTo: '/home', pathMatch: 'full'},
@@ -17,7 +18,8 @@ const routes: Routes = [
   {path:'login', component: LoginPageComponent},
   {path:'details/:id/:timestamp', component: MovieInfoComponent},
   {path:'home/movies/subscription', component: MovieSubscriptionsComponent},
-  {path:'play/:id', component: PlayerComponent}
+  {path:'play/:id', component: PlayerComponent},
+  {path:'home/movies/new', component: CreateMovieComponent}
 ]
 
 @NgModule({

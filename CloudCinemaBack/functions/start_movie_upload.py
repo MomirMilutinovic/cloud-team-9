@@ -63,6 +63,7 @@ def start_movie_upload(event, context):
             'Bucket': bucket_name,
             'Key': str(id),
             'Expires': 3600,
+            'ContentType': 'application/octet-stream'
         }, ExpiresIn=3600, HttpMethod="PUT")
 
         request_body['id'] = str(id)
@@ -83,7 +84,13 @@ def start_movie_upload(event, context):
         return {
             'statusCode': 201,
             'body': json.dumps(response_body, default=str),
-            'isBase64Encoded': False 
+            'isBase64Encoded': False,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin':'*',
+                'Access-Control-Allow-Methods': 'PUT,OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
+            }
         }
     except Exception as e:
         print('##EXCEPTION')
