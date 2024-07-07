@@ -82,13 +82,14 @@ export class MovieService {
     return this.httpClient.delete<any>(url, {params});
   }
 
-  getAllScan(name: string, actors: string, genres: string, director: string) {
+  getAllScan(name: string, actors: string, genres: string, director: string,description:string) {
     const url = environment.apiHost + 'movies/scan';
     let params = new HttpParams();
     params = params.append('movie_name',name);
     params = params.append('actors', actors);
     params = params.append('genres', genres);
     params = params.append('director', director);
+    params = params.append('description', description);
     return this.httpClient.get<MovieInfo[]>(url,{params});
   }
   getEpisodes(name: string): Observable<MovieInfo[]>  {

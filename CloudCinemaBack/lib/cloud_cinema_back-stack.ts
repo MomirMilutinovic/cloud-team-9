@@ -216,6 +216,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    movie_info_table.addGlobalSecondaryIndex({
+      indexName: 'DescriptionIndex',
+      partitionKey: { name: 'description', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     const watch_history_table = new dynamodb.Table(this, 'CloudCinemaWatchHistoryTable', {
       tableName: 'cloud-cinema-watch-history', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
@@ -396,6 +402,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
     scanMovies.addEnvironment("DIRECTOR_INDEX_NAME","DirectorIndex")
     scanMovies.addEnvironment("ACTORS_INDEX_NAME","ActorsIndex")
     scanMovies.addEnvironment("GENRES_INDEX_NAME","GenresIndex")
+    scanMovies.addEnvironment("DESCRIPTION_INDEX_NAME","DescriptionIndex")
+
 
     searchMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(searchMovies);

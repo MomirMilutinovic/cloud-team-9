@@ -31,6 +31,8 @@ def edit_one(event, context):
         id = request_body['id']
         genres = request_body['genres']
         episode = request_body['episode']
+        description = request_body['description']
+
 
         table = dynamodb.Table(table_name)
         search_table = dynamodb.Table(search_table_name)
@@ -40,14 +42,15 @@ def edit_one(event, context):
                 'id': id,
                 'timestamp': timestamp
             },
-            UpdateExpression='SET #name = :name, #director = :director, #actors = :actors, #year = :year, #genres = :genres, #episode = :episode',
+            UpdateExpression='SET #name = :name, #director = :director, #actors = :actors, #year = :year, #genres = :genres, #episode = :episode, #description = :description',
             ExpressionAttributeNames={
                 '#name': 'name',
                 '#director': 'director',
                 '#actors': 'actors',
                 '#year': 'year',
                 '#genres': 'genres',
-                '#episode': 'episode'
+                '#episode': 'episode',
+                '#description':'description'
             },
             ExpressionAttributeValues={
                 ':name': name,
@@ -55,7 +58,8 @@ def edit_one(event, context):
                 ':actors': actors,
                 ':year': year,
                 ':genres': genres,
-                ':episode': episode
+                ':episode': episode,
+                ':description':description
             },
             ReturnValues='ALL_NEW'
         )
@@ -64,7 +68,7 @@ def edit_one(event, context):
         genres.sort()
         actors_list=",".join(actors)
         genres_list=",".join(genres)
-        attributes=name+","+actors_list+","+director+","+genres_list
+        attributes=name+","+actors_list+","+director+","+genres_list+","+description
         response = search_table.update_item(
             Key={
                 'id': id,

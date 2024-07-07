@@ -23,6 +23,7 @@ def start_movie_upload(event, context):
         director = request_body['director']
         actors = request_body['actors']
         year = request_body['year']
+        description = request_body['description']
         genres = request_body['genres']
         episode = request_body['episode']
         id = uuid.uuid4()
@@ -32,6 +33,7 @@ def start_movie_upload(event, context):
             Item={
                 'id': str(id),
                 'name': name,
+                'description':description,
                 'director': director,
                 'actors': actors,
                 'genres':genres,
@@ -45,7 +47,7 @@ def start_movie_upload(event, context):
         genres.sort()
         actors_list=",".join(actors)
         genres_list=",".join(genres)
-        attributes=name+","+actors_list+","+director+","+genres_list
+        attributes=name+","+actors_list+","+director+","+genres_list+','+description
         search_table = dynamodb.Table(search_table_name)
         search_response = search_table.put_item(
             Item={

@@ -25,7 +25,7 @@ export class EditMovieComponent implements OnInit{
   ngOnInit(): void {
 
     this.movieForm = this.fb.group({
-      id: [''], // You may want to disable editing of ID depending on your requirements
+      id: [''],
       name: ['', Validators.required],
       description: ['', Validators.required],
       genres: [[]],
