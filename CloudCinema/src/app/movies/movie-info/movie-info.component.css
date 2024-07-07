@@ -1,24 +1,32 @@
-body {
+#main_div {
     font-family: 'Roboto', sans-serif;
-    background-color: #f0f0f0;
+    background-color: white;
     margin: 0;
     padding: 0;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     color: #333;
 }
 #titlePlayDiv{
   display: flex;
 }
 #playBtn{
-  margin-top: 30px;
+  background-color: rgb(113, 146, 178);
+  font-size: 20px;
+  margin-top: 10px;
+  width: 100px;
   height: 50px;
+}
+#playDiv{
+  width: 100%;
+  text-align: right;
 }
 
 
 .container {
+    margin-top: 100px;
     background-color: white;
     padding: 40px 60px;
     border-radius: 10px;
@@ -69,5 +77,4 @@ button{
     cursor: pointer;
     font-size: 14px;
     color: #fff;
-    /* background: hsl(60, 1%, 84%, 90); */
 }

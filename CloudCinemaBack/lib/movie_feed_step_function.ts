@@ -78,12 +78,15 @@ export class MovieGenerateFeedStepFunction extends Construct {
         movieFeedTable.grantReadWriteData(this.createResultFeed)
         
         this.feedFromDownload.addEnvironment('MOVIE_TABLE_NAME', movieInfoTable.tableName);
+        this.feedFromDownload.addEnvironment('INDEX_NAME', 'DownloadHistoryIndex');
         this.feedFromDownload.addEnvironment('MOVIE_DOWNLOAD_TABLE_NAME', movieDownloadTable.tableName);
 
         this.feedFromRating.addEnvironment('MOVIE_TABLE_NAME', movieInfoTable.tableName);
+        this.feedFromRating.addEnvironment('INDEX_NAME', 'RatingIndex');
         this.feedFromRating.addEnvironment('MOVIE_RATING_TABLE_NAME', movieRatingTable.tableName);
 
         this.feedFromSubcription.addEnvironment('MOVIE_TABLE_NAME', movieInfoTable.tableName);
+        this.feedFromSubcription.addEnvironment('INDEX_NAME', 'SubscriptionIndex');
         this.feedFromSubcription.addEnvironment('MOVIE_SUB_TABLE_NAME', movieSubscriptionTable.tableName);
 
         this.createResultFeed.addEnvironment('TABLE_FEED_NAME', movieFeedTable.tableName);

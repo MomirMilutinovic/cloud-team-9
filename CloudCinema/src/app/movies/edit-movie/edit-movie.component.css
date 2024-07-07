@@ -21,7 +21,7 @@ textarea {
 
 button {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: rgb(113, 146, 178);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -29,5 +29,5 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: rgba(113, 146, 178, 0.76);
 }

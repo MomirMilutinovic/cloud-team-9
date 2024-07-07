@@ -3,6 +3,7 @@ import {ActivatedRoute} from "@angular/router";
 import {MovieService} from "../movie.service";
 import {MovieInfo} from "../models/models.module";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-edit-movie',
@@ -17,7 +18,7 @@ export class EditMovieComponent implements OnInit{
   timestamp:number;
   movie:MovieInfo;
 
-  constructor(private route: ActivatedRoute, private service: MovieService,
+  constructor(private snackBar:MatSnackBar,private route: ActivatedRoute, private service: MovieService,
               private fb: FormBuilder) {
   }
 
@@ -65,9 +66,15 @@ export class EditMovieComponent implements OnInit{
     this.service.editMovie(updatedMovie).subscribe(
       {
         next: () => {
+          this.snackBar.open("Movie edited!", 'Close', {
+            duration: 3000,
+          });
           console.log('success!')
         },
         error: (_) => {
+          this.snackBar.open("Error during editing!", 'Close', {
+            duration: 3000,
+          });
         }
       }
     );

@@ -6,6 +6,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {HttpResponse} from "@angular/common/http";
 import {MimetypesKind} from "video.js/dist/types/utils/mimetypes";
 import mov = MimetypesKind.mov;
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-movie-info',
@@ -17,18 +18,8 @@ export class MovieInfoComponent {
   timestamp:number
   movie:MovieInfo
 
-  @Input() maxRatingActor =5;
-  @Input() SelectedStarActor=0;
-  actorAverageRating:number;
-  maxRatingArrActor=[];
-  previouseSelectedActor = 0;
   protected readonly Array = Array;
 
-  @Input() maxRatingGenre =5;
-  @Input() SelectedStarGenre=0;
-  genreAverageRating:number;
-  maxRatingArrGenre=[];
-  previouseSelectedGenre = 0;
 
   @Input() maxRatingDirector =5;
   @Input() SelectedStarDirector=0;
@@ -37,7 +28,8 @@ export class MovieInfoComponent {
   previouseSelectedDirector = 0;
   isLoaded:boolean = false;
 
-  constructor(private route: ActivatedRoute, private service: MovieService,private router:Router) {}
+  constructor(private route: ActivatedRoute, private service: MovieService,private router:Router,
+              private snackBar: MatSnackBar) {}
 
 
   ngOnInit(): void {
@@ -52,42 +44,9 @@ export class MovieInfoComponent {
       })
     });
     // @ts-ignore
-    this.maxRatingArrActor = Array(this.maxRatingActor).fill(0);
-    // @ts-ignore
     this.maxRatingArrDirector = Array(this.maxRatingDirector).fill(0);
-    // @ts-ignore
-    this.maxRatingArrGenre = Array(this.maxRatingGenre).fill(0);
 
    }
-
-  HandeMouseLeaveActor() {
-    if (this.previouseSelectedActor!==0){
-      this.SelectedStarActor = this.previouseSelectedActor;
-    }
-  }
-  HandleMouseEnterActor(index:number){
-    this.SelectedStarActor=index+1;
-  }
-
-  RatingActor(index:number) {
-    this.SelectedStarActor=index+1;
-    this.previouseSelectedActor=this.SelectedStarActor;
-  }
-
-
-  HandeMouseLeaveGenre() {
-    if (this.previouseSelectedGenre!==0){
-      this.SelectedStarGenre = this.previouseSelectedGenre;
-    }
-  }
-  HandleMouseEnterGenre(index:number){
-    this.SelectedStarGenre=index+1;
-  }
-
-  RatingGenre(index:number) {
-    this.SelectedStarGenre=index+1;
-    this.previouseSelectedGenre=this.SelectedStarGenre;
-  }
 
 
   HandeMouseLeaveDirector() {
@@ -104,63 +63,42 @@ export class MovieInfoComponent {
     this.previouseSelectedDirector=this.SelectedStarDirector;
   }
 
-  RateActors(){
-    let rateActor = this.SelectedStarActor;
-    console.log(rateActor)
+  SendRate() {
     const userEmail = localStorage.getItem('userEmail') || ""
-
-    const ratingInfo : RatingInfo = {
-      email: userEmail,
-      type:"Actor",
-      rate: rateActor,
-      attributes:this.movie.actors
-    }
-
-    this.SendRate(ratingInfo)
-  }
-
-
-  RateDirectors() {
-    let rateDirector = this.SelectedStarDirector;
-    const userEmail = localStorage.getItem('userEmail') || ""
-    let directors: string[] = []
-    directors.push(this.movie.director || "")
-
-    const ratingInfo : RatingInfo = {
-      email: userEmail,
-      rate: rateDirector,
-      type:"Director",
-      attributes:directors
-    }
-
-    this.SendRate(ratingInfo)
-  }
-
-  RateGenres() {
-    let rateGenre = this.SelectedStarGenre;
-    const userEmail = localStorage.getItem('userEmail') || ""
-
-    const ratingInfo : RatingInfo = {
-      email: userEmail,
-      rate: rateGenre,
-      type:"Genre",
-      attributes:this.movie.genres
-    }
-
-    this.SendRate(ratingInfo)
-  }
-
-  SendRate(ratingInfo : RatingInfo) {
-    this.service.rateMovie(ratingInfo).subscribe(
-      {
-        next: () => {
-          console.log('success!')
-        },
-        error: (_) => {
-          console.log("error")
-        }
+    let rate = this.SelectedStarDirector;
+    if (rate>0) {
+      const ratingInfo : RatingInfo = {
+        email: userEmail,
+        movie_id:this.movie.id,
+        rate: rate,
+        genres:this.movie.genres,
+        actors:this.movie.actors
       }
-    );
+
+      this.service.rateMovie(ratingInfo).subscribe(
+        {
+          next: () => {
+            console.log('success!')
+            this.snackBar.open("Movie rated!", 'Close', {
+              duration: 3000,
+            });
+          },
+          error: (error) => {
+            console.log(error.status)
+            if(error.status==404){
+              this.snackBar.open("You cannot rate a movie you have not watched!", 'Close', {
+                duration: 3000
+              });
+            }
+            console.log("error")
+          }
+        }
+      );
+    }else{
+      this.snackBar.open("Please select how many stars you want to give this movie!", 'Close', {
+        duration: 3000
+      });
+    }
   }
 
   Play(movie:MovieInfo) {
@@ -168,6 +106,7 @@ export class MovieInfoComponent {
     const userEmail = localStorage.getItem('userEmail') || ""
     const info: WatchInfo = {
       email: userEmail,
+      movie_id:movie.id,
       genres: movie.genres,
       actors: movie.actors
     }

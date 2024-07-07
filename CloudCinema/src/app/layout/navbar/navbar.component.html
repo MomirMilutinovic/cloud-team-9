@@ -4,34 +4,9 @@
     <img class="logo" src="../../../assets/images/cloud_logo.png" alt="Illustration Image">
   </div>
   <div class="leftSide">
-    <button mat-icon-button class="example-icon favorite-icon">
+    <button [routerLink]="['']" mat-icon-button class="example-icon favorite-icon">
       <mat-icon>home</mat-icon>
     </button>
-<!--    <button  mat-icon-button class="example-icon favorite-icon">-->
-<!--      <span>Movies</span>-->
-<!--    </button>-->
-<!--    <button  mat-icon-button class="example-icon favorite-icon">-->
-<!--      <span>Series</span>-->
-<!--    </button>-->
-<!--    <div class="dropdown">-->
-<!--      <button class="dropbtn">Genres</button>-->
-<!--      <div formControlName="genre" class="dropdown-content">-->
-<!--        <a href="#">Horror</a>-->
-<!--        <a href="#">Romance</a>-->
-<!--        <a href="#">Action</a>-->
-<!--        <a href="#">Comedy</a>-->
-<!--      </div>-->
-<!--    </div>-->
-
-<!--    <mat-form-field>-->
-<!--      <mat-label>Favorite food</mat-label>-->
-<!--      <mat-select>-->
-<!--       <div *ngFor="let genre of genres">-->
-<!--        <mat-option [value]="genre">{{genre}}</mat-option>-->
-<!--       </div>-->
-<!--      </mat-select>-->
-<!--    </mat-form-field>-->
-
   </div>
   <div class="rightSide">
     <button  mat-icon-button class="example-icon favorite-icon" (click)="signOut()">
@@ -71,7 +46,7 @@
     </div>
     <button (click)="search()"><mat-icon matPrefix>search</mat-icon></button>
 
-</div>
+  </div>
 
 </mat-toolbar>
 

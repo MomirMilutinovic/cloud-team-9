@@ -202,7 +202,19 @@ export class CloudCinemaBackStack extends cdk.Stack {
       readCapacity:1,           
       writeCapacity:1,
       stream:dynamodb.StreamViewType.NEW_IMAGE
-    }); 
+    });
+    
+    movie_info_table.addGlobalSecondaryIndex({
+      indexName: 'TitleIndex',
+      partitionKey: { name: 'name', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    movie_info_table.addGlobalSecondaryIndex({
+      indexName: 'DirectorIndex',
+      partitionKey: { name: 'director', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
 
     const watch_history_table = new dynamodb.Table(this, 'CloudCinemaWatchHistoryTable', {
       tableName: 'cloud-cinema-watch-history', 
@@ -213,6 +225,12 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1,
       stream:dynamodb.StreamViewType.NEW_IMAGE
     });
+    
+    watch_history_table.addGlobalSecondaryIndex({
+      indexName: 'WatchHistoryIndex',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
 
     const rating_info_table = new dynamodb.Table(this, 'CloudCinemaRatingInfoTable', {
       tableName: 'cloud-cinema-rating-info', 
@@ -220,9 +238,15 @@ export class CloudCinemaBackStack extends cdk.Stack {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
-      writeCapacity:1,
-    }); 
-    
+      writeCapacity:1
+    });
+
+    rating_info_table.addGlobalSecondaryIndex({
+      indexName: 'RatingIndex',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL
+    });
+     
     const movie_search_table = new dynamodb.Table(this, 'CloudCinemaMovieSearchTable', {
       tableName: 'cloud-cinema-movie-search', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
@@ -232,13 +256,39 @@ export class CloudCinemaBackStack extends cdk.Stack {
       writeCapacity:1
     });
 
+    movie_search_table.addGlobalSecondaryIndex({
+      indexName: 'SearchIndex',
+      partitionKey: { name: 'attributes', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    movie_search_table.addGlobalSecondaryIndex({
+      indexName: 'ActorsIndex',
+      partitionKey: { name: 'actors', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    movie_search_table.addGlobalSecondaryIndex({
+      indexName: 'GenresIndex',
+      partitionKey: { name: 'genres', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     const subscription_table = new dynamodb.Table(this, 'CloudCinemaSubscriptionTable', {
       tableName: 'cloud-cinema-subscription', 
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,
-      writeCapacity:1
+      writeCapacity:1,
+      stream:dynamodb.StreamViewType.NEW_IMAGE
+
+    });
+
+    subscription_table.addGlobalSecondaryIndex({
+      indexName: 'SubscriptionIndex',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
     });
 
     const feed_info_table = new dynamodb.Table(this, 'CloudCinemaFeedInfoTable', {
@@ -255,7 +305,14 @@ export class CloudCinemaBackStack extends cdk.Stack {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,
-      writeCapacity:1
+      writeCapacity:1,
+      stream:dynamodb.StreamViewType.NEW_IMAGE
+    });
+    
+    download_history_info_table.addGlobalSecondaryIndex({
+      indexName: 'DownloadHistoryIndex',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
     });
 
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
@@ -315,13 +372,6 @@ export class CloudCinemaBackStack extends cdk.Stack {
     movie_info_table.grantWriteData(startMovieUpload);
     movie_search_table.grantWriteData(startMovieUpload);
 
-
-    movie_search_table.addGlobalSecondaryIndex({
-      indexName: 'SearchIndex',
-      partitionKey: { name: 'attributes', type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
-    });
-
     const searchMovies = new lambda.Function(this, 'SearchMoviesFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'movies_search.get_all', 
@@ -331,7 +381,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     const scanMovies = new lambda.Function(this, 'ScanMoviesFunction', {
       runtime: lambda.Runtime.PYTHON_3_9,
-      handler: 'movies_search.get_all_scan', 
+      handler: 'movies_filter.get_all', 
       code: lambda.Code.fromAsset(path.join(__dirname,'../functions')),
       timeout: cdk.Duration.seconds(30)
     });
@@ -342,7 +392,10 @@ export class CloudCinemaBackStack extends cdk.Stack {
     scanMovies.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
     movie_search_table.grantReadData(scanMovies);
 
-    scanMovies.addEnvironment("INDEX_NAME","SearchIndex")
+    scanMovies.addEnvironment("TITLE_INDEX_NAME","TitleIndex")
+    scanMovies.addEnvironment("DIRECTOR_INDEX_NAME","DirectorIndex")
+    scanMovies.addEnvironment("ACTORS_INDEX_NAME","ActorsIndex")
+    scanMovies.addEnvironment("GENRES_INDEX_NAME","GenresIndex")
 
     searchMovies.addEnvironment("TABLE_NAME", movie_info_table.tableName)
     movie_info_table.grantReadData(searchMovies);
@@ -372,6 +425,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
     });
 
     editMovieInfo.addEnvironment("TABLE_NAME", movie_info_table.tableName)
+    editMovieInfo.addEnvironment("SEARCH_TABLE_NAME", movie_search_table.tableName)
+    movie_search_table.grantWriteData(editMovieInfo);
     movie_info_table.grantReadData(editMovieInfo);
     movie_info_table.grantWriteData(editMovieInfo);
 
@@ -561,6 +616,9 @@ export class CloudCinemaBackStack extends cdk.Stack {
 
     rateMovie.addEnvironment("TABLE_NAME", rating_info_table.tableName)
     rating_info_table.grantWriteData(rateMovie);
+    rateMovie.addEnvironment("WATCH_HISTORY_TABLE_NAME", watch_history_table.tableName)
+    rateMovie.addEnvironment("INDEX_NAME", 'WatchHistoryIndex')
+    watch_history_table.grantReadData(rateMovie);
 
 
     const updateWatchHistory = new lambda.Function(this, 'UpdateWatchHistoryFunction', {
@@ -630,6 +688,16 @@ export class CloudCinemaBackStack extends cdk.Stack {
     });
 
     startGenerateFeed.addEventSource(new DynamoEventSource(watch_history_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
+    startGenerateFeed.addEventSource(new DynamoEventSource(download_history_info_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
+    startGenerateFeed.addEventSource(new DynamoEventSource(subscription_table, {
       startingPosition: lambda.StartingPosition.LATEST,
       batchSize: 100,
       retryAttempts: 1,

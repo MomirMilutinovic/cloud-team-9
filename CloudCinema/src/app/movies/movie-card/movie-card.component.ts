@@ -4,6 +4,7 @@ import {MovieService} from "../movie.service";
 import {HttpResponse} from "@angular/common/http";
 import {Router} from "@angular/router";
 import { AuthService } from 'src/app/auth/auth.service';
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-movie-card',
@@ -17,7 +18,7 @@ export class MovieCardComponent implements OnInit {
   userEmail:string|null;
   editDisabled = true;
 
-  constructor(private movieService: MovieService, private authService: AuthService, private router: Router) {
+  constructor(private snackBar:MatSnackBar,private movieService: MovieService, private authService: AuthService, private router: Router) {
     this.editDisabled = true;
   }
 
@@ -29,6 +30,7 @@ export class MovieCardComponent implements OnInit {
     const userEmail = localStorage.getItem('userEmail') || ""
     const info: WatchInfo = {
       email: userEmail,
+      movie_id:movie.id,
       genres: movie.genres,
       actors: movie.actors
     }
@@ -77,8 +79,14 @@ export class MovieCardComponent implements OnInit {
     this.movieService.deleteMovie(movie.id, movie.timestamp).subscribe(
       (response: HttpResponse<any>) => {
         console.log("SUCCESS!")
+        this.snackBar.open("Movie deleted!", 'Close', {
+          duration: 3000,
+        });
       },
       error => {
+        this.snackBar.open("Error during deleting movie!", 'Close', {
+          duration: 3000,
+        });
         console.error('Error:', error);
       }
     );

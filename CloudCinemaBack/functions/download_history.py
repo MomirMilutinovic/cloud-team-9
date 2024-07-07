@@ -14,6 +14,7 @@ def update_download_history(event, context):
         email = request_body['email']
         actors = request_body['actors']
         genres = request_body['genres']
+        movie_id = request_body['movie_id']
 
         table = dynamodb.Table(download_table_name)
 
@@ -26,7 +27,8 @@ def update_download_history(event, context):
                 'timestamp': timestamp,
                 'email': email,
                 'genres': genres,
-                'actors':  actors
+                'actors':  actors,
+                'movie_id':movie_id
             }
         )
         return {

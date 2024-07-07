@@ -43,13 +43,17 @@ def start_movie_upload(event, context):
         )
         actors.sort()
         genres.sort()
-        attributes=name+","+",".join(actors)+","+director+","+",".join(genres)  
+        actors_list=",".join(actors)
+        genres_list=",".join(genres)
+        attributes=name+","+actors_list+","+director+","+genres_list
         search_table = dynamodb.Table(search_table_name)
         search_response = search_table.put_item(
             Item={
                 'id': str(id),
                 'attributes': attributes,
-                'timestamp':timestamp
+                'timestamp':timestamp,
+                'actors':actors_list,
+                'genres':genres_list
                 }
         )
 

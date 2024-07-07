@@ -21,7 +21,7 @@ def get_all(event, context):
             IndexName=index_name,
             KeyConditionExpression=Key('attributes').eq(params))
         
-        if 'Items' in response:
+        if 'Items' in response  and len(response['Items']) > 0:
             # movie_ids_timestamps = response['Items']
             item = response['Items'][0]
             # for item in movie_ids_timestamps:
@@ -49,67 +49,3 @@ def get_all(event, context):
             'statusCode': 500,
             'body': json.dumps(str(e))
         }
-
-
-
-def get_all_scan(event, context):
-    try:
-        movie_name = event['queryStringParameters']['movie_name']
-        actors = event['queryStringParameters']['actors']
-        genres = event['queryStringParameters']['genres']
-        director=event['queryStringParameters']['director']
-        dynamodb = boto3.resource('dynamodb')
-        table=dynamodb.Table(table_name)
-
-        actors = actors.split(',') if actors else []
-        genres = genres.split(',') if genres else []
-
-        filter_expressions = []
-
-        if movie_name:
-            filter_expressions.append(Attr('name').contains(movie_name))
-
-        if director:
-            filter_expressions.append(Attr('director').contains(director))
-
-        for actor in actors:
-            filter_expressions.append(Attr('actors').contains(actor))
-
-        for genre in genres:
-            filter_expressions.append(Attr('genres').contains(genre))
-
-        combined_filter_expression = None
-
-        if filter_expressions:
-            combined_filter_expression = filter_expressions[0]
-            for expression in filter_expressions[1:]:
-                combined_filter_expression = combined_filter_expression & expression
-
-            response = table.scan(
-                FilterExpression=combined_filter_expression
-                )
-        else:
-            response = table.scan()
-
-
-        return {
-                'statusCode': 200,
-                'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-                'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
-                'Access-Control-Allow-Origin': '*' 
-                }  ,
-                'body': json.dumps(response['Items'],default=str)
-            }
-    
-    except Exception as e:
-        print(e)
-        print(traceback.format_exc())
-        print('#BODY')
-        print(event['body'])
-        return {
-            'statusCode': 500,
-            'body': json.dumps(str(e))
-        }
-
