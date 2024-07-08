@@ -1,6 +1,7 @@
 import traceback
 import os
 import boto3
+import json
 
 bucket_name = os.environ['BUCKET_NAME']
 table_name = os.environ['TABLE_NAME']
@@ -10,7 +11,8 @@ step_functions = boto3.client('stepfunctions')
 
 def send_movie_upload_task_result(event, context):
     try:
-        id = event['Records'][0]['s3']['object']['key']
+        body = json.loads(event['Records'][0]['Sns']['Message']) 
+        id = body['Records'][0]['s3']['object']['key']
 
         task_token_table = dynamodb.Table(table_name)
         task_token = task_token_table.get_item(
@@ -33,3 +35,5 @@ def send_movie_upload_task_result(event, context):
         print("#EXCEPTION")
         print(e)
         print(traceback.format_exc())
+        print("#BODY")
+        print(event)
