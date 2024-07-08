@@ -6,6 +6,7 @@ import {Router} from "@angular/router";
 import { AuthService } from 'src/app/auth/auth.service';
 import {MatSnackBar} from "@angular/material/snack-bar";
 
+
 @Component({
   selector: 'app-movie-card',
   templateUrl: './movie-card.component.html',
@@ -42,6 +43,12 @@ export class MovieCardComponent implements OnInit {
         console.error('Error:', error);
       }
     );
+
+
+    if (movie.id) {
+      this.movieService.downloadMovie(movie.id, '144p');
+    }
+    /*
     // @ts-ignore
     this.movieService.getMovie(movie.id).subscribe(
       (response: HttpResponse<any>) => {
@@ -60,7 +67,10 @@ export class MovieCardComponent implements OnInit {
         console.error('Error:', error);
       }
     );
+    */
   }
+
+
 
   play(movieId: string |  undefined, timestamp: number | undefined) {
     //pozvati prikaz informacija

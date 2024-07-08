@@ -4,6 +4,8 @@ import {SubscriptionInfo} from "./models/models.module";
 import {BehaviorSubject, catchError, map, Observable, of, switchMap, tap} from "rxjs";
 import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../env/env";
+import { FFmpeg } from '@diffusion-studio/ffmpeg-js';
+
 
 @Injectable({
   providedIn: 'root'
@@ -139,4 +141,39 @@ export class MovieService {
       })
     );
   }
+
+  downloadMovie(id: string, quality: string) {
+    const ffmpeg = new FFmpeg();
+    const playlistFileName = id + '_' + quality + '.m3u8';
+    ffmpeg.whenReady(async () => {
+      await this.downloadSegments(id, quality, ffmpeg);
+      await ffmpeg.exec(['-i', playlistFileName, '-c', 'copy', '-bsf:a', 'aac_adtstoasc', 'download.mp4'])
+      const result: Uint8Array = ffmpeg.readFile('download.mp4');
+      this.downloadData(result, 'video/mp4')
+    });
+  }
+
+  private async downloadSegments(id: string, quality: string, ffmpeg: FFmpeg) {
+      const source = environment.transcodedMovieBucketUrl + id + '_' + quality + '.m3u8';
+      const playlistFileName = id + '_' + quality + '.m3u8';
+      await ffmpeg.writeFile(playlistFileName, source);
+      const playlistAsString = new TextDecoder().decode(ffmpeg.readFile(playlistFileName));
+      const segmentFilenames = playlistAsString.split('\n').filter(line => !line.startsWith('#') && (line.trim() != ''));
+      const segmentDownloads = segmentFilenames.map((filename) => {
+        return ffmpeg.writeFile(filename, environment.transcodedMovieBucketUrl + filename);
+      });
+      await Promise.all(segmentDownloads)
+  }
+
+  private downloadData(file: Uint8Array, mimeType: string) {
+    // Taken from https://github.com/diffusion-studio/ffmpeg-js/blob/main/examples/src/main.ts
+    const a = document.createElement('a');
+    document.head.appendChild(a);
+    a.download = `rendered-file.${mimeType.split("/").at(1)}`
+    a.href = URL.createObjectURL(
+      new Blob([file], { type: mimeType })
+    )
+    a.click();
+  }
+
 }
