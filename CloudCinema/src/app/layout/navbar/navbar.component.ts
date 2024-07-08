@@ -27,6 +27,7 @@ export class NavbarComponent implements OnInit{
   ngOnInit(): void {
     this.searchForm = this.fb.group({
       movieName: [''],
+      description:[''],
       actors: [''],
       genres:[''],
       director:['']
@@ -42,15 +43,17 @@ export class NavbarComponent implements OnInit{
     let actors= this.searchForm.value.actors as string;
     let director= this.searchForm.value.director as string;
     let genres= this.searchForm.value.genres as string;
+    let description= this.searchForm.value.description as string;
 
-    if(name!="" && actors!="" && director!="" && genres!=""){  //ako je sve uneo saljemo query
+
+    if(name!="" && actors!="" && director!="" && genres!="" && description!=""){  //ako je sve uneo saljemo query
       const actorsList=actors.split(',').sort()
       actors=actorsList.join(',')
 
       const genresList=genres.split(',').sort()
       genres=genresList.join(',')
 
-      const query=name+","+actors+","+director+","+genres
+      const query=name+","+actors+","+director+","+genres+","+description
 
       this.service.search(query).subscribe(value => {
         this.movies=value;
@@ -68,7 +71,7 @@ export class NavbarComponent implements OnInit{
         const genresList=genres.split(',').sort()
         genres=genresList.join(',')
       }
-      this.service.getAllScan(name,actors,genres,director).subscribe(value => {
+      this.service.getAllScan(name,actors,genres,director,description).subscribe(value => {
         this.movies=value;
         console.log(this.movies);
         this.service.setMovies(this.movies)

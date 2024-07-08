@@ -11,6 +11,8 @@ title_index_name=os.environ['TITLE_INDEX_NAME']
 director_index_name=os.environ['DIRECTOR_INDEX_NAME']
 actors_index_name=os.environ['ACTORS_INDEX_NAME']
 genres_index_name=os.environ['GENRES_INDEX_NAME']
+description_index_name=os.environ['DESCRIPTION_INDEX_NAME']
+
 
 
 
@@ -20,21 +22,18 @@ def get_all(event, context):
         actors = event['queryStringParameters']['actors']
         genres = event['queryStringParameters']['genres']
         director=event['queryStringParameters']['director']
+        description=event['queryStringParameters']['description']
         dynamodb = boto3.resource('dynamodb')
         table=dynamodb.Table(table_name)
         search_table=dynamodb.Table(search_table_name)
 
-        if movie_name=='' and actors=='' and genres=='' and director=='':
+        if movie_name=='' and actors=='' and genres=='' and director=='' and description=='':
             response=table.scan()
             return create_response(response['Items'])
 
-        # actors.sort()
-        # genres.sort()
-        # actors_list=",".join(actors)
-        # genres_list=",".join(genres)
-
         name_results = set()
         director_results = set()
+        description_results = set()
         actors_results = set()
         genres_results = set()
         
@@ -55,6 +54,16 @@ def get_all(event, context):
             )
             if 'Items' in response and len(response['Items']) > 0:
                 director_results = {(item['id'], item['timestamp']) for item in response['Items']}
+            else:
+                return create_response([])
+            
+        if description:
+            response = table.query(
+                IndexName=description_index_name,
+                KeyConditionExpression=Key('description').eq(description)
+            )
+            if 'Items' in response and len(response['Items']) > 0:
+                description_results = {(item['id'], item['timestamp']) for item in response['Items']}
             else:
                 return create_response([])
         
@@ -78,7 +87,7 @@ def get_all(event, context):
             else:
                 return create_response([])
 
-        all_results = [name_results, director_results, actors_results, genres_results]
+        all_results = [name_results, director_results, actors_results, genres_results, description_results]
         filtered_results = set.intersection(*filter(None, all_results))
 
         results=[]
