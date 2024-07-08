@@ -30,52 +30,13 @@ export class MovieCardComponent implements OnInit {
   }
 
   download(movie:MovieInfo) {
-    const userEmail = localStorage.getItem('userEmail') || ""
-    const info: WatchInfo = {
-      email: userEmail,
-      movie_id:movie.id,
-      genres: movie.genres,
-      actors: movie.actors
-    }
-    this.movieService.updateDownloadHistory(info).subscribe(
-      (response: HttpResponse<any>) => {
-        console.log("SUCCESS!")
-      },
-      error => {
-        console.error('Error:', error);
-      }
-    );
-
-
     if (movie.id) {
       this.matDialog.open(DownloadDialogComponent, {
         width: '400px',
-        data: {id: movie.id}
+        data: {movie: movie}
       });
     }
-    /*
-    // @ts-ignore
-    this.movieService.getMovie(movie.id).subscribe(
-      (response: HttpResponse<any>) => {
-        let dataType = response.type;
-        let binaryData = [];
-        binaryData.push(response.body);
-        let downloadLink = document.createElement('a');
-        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, {type: dataType.toString()}));
-        if (movie.id)
-            downloadLink.setAttribute('download', movie.id);
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        downloadLink.parentNode?.removeChild(downloadLink);
-      },
-      error => {
-        console.error('Error:', error);
-      }
-    );
-    */
   }
-
-
 
   play(movieId: string |  undefined, timestamp: number | undefined) {
     //pozvati prikaz informacija
