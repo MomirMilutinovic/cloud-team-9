@@ -153,6 +153,7 @@ export class MovieService {
       if (callback) {
         callback();
       }
+      ffmpeg.clearMemory();
     });
   }
 
