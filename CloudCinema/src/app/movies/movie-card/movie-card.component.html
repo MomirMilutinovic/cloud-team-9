@@ -1,6 +1,6 @@
 <div class="movie-card">
   <div id="card-info-div">
-    <h2>{{ movie.name }}</h2>
+    <h2>{{ movie.name }}<span *ngIf="movie.episode">&nbsp;{{movie.episode}}</span></h2> 
     <p>{{ movie.description }}</p>
     <p><strong>Genres:</strong> {{ movie.genres }}</p>
     <p><strong>Year:</strong> {{ movie.year }}</p>
