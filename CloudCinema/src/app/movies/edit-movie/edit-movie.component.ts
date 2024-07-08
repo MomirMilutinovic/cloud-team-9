@@ -17,6 +17,7 @@ export class EditMovieComponent implements OnInit{
   movieId:string|null;
   timestamp:number;
   movie:MovieInfo;
+  selectedFile: File;
 
   constructor(private snackBar:MatSnackBar,private route: ActivatedRoute, private service: MovieService,
               private fb: FormBuilder) {
@@ -78,5 +79,28 @@ export class EditMovieComponent implements OnInit{
         }
       }
     );
+
+    if (this.selectedFile && this.movieId) {
+      this.service.editMovieFile(this.movieId, this.selectedFile).subscribe(
+        {
+          next: () => {
+            this.snackBar.open("File uploaded!", 'Close', {
+              duration: 3000,
+            });
+            console.log('success!')
+          },
+          error: (_) => {
+            this.snackBar.open("Error during file upload!", 'Close', {
+              duration: 3000,
+            });
+          }
+        }
+      );
+    }
   }
+
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0];
+  }
+
 }

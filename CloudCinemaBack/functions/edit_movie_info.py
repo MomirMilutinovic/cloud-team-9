@@ -33,7 +33,6 @@ def edit_one(event, context):
         episode = request_body['episode']
         description = request_body['description']
 
-
         table = dynamodb.Table(table_name)
         search_table = dynamodb.Table(search_table_name)
 
@@ -50,7 +49,7 @@ def edit_one(event, context):
                 '#year': 'year',
                 '#genres': 'genres',
                 '#episode': 'episode',
-                '#description':'description'
+                '#description': 'description'
             },
             ExpressionAttributeValues={
                 ':name': name,
@@ -59,7 +58,7 @@ def edit_one(event, context):
                 ':year': year,
                 ':genres': genres,
                 ':episode': episode,
-                ':description':description
+                ':description': description
             },
             ReturnValues='ALL_NEW'
         )

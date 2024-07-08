@@ -15,6 +15,9 @@
     <button  mat-icon-button class="example-icon favorite-icon" [routerLink]="['home/movies/subscription']">
       <mat-icon>notifications</mat-icon>
     </button>
+    <button  mat-icon-button class="example-icon favorite-icon" [routerLink]="['home/movies/new']" *ngIf="isAdmin">
+      <mat-icon>note_add</mat-icon>
+    </button>
 
     <div class="search-container">
       <mat-form-field appearance="outline">

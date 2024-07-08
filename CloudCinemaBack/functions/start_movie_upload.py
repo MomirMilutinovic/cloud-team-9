@@ -19,6 +19,7 @@ def start_movie_upload(event, context):
     try:
         request_body = json.loads(event['body'])
         name = request_body['name']
+        description = request_body['description']
         timestamp = int(time.time())
         director = request_body['director']
         actors = request_body['actors']
@@ -33,14 +34,14 @@ def start_movie_upload(event, context):
             Item={
                 'id': str(id),
                 'name': name,
-                'description':description,
+                'description': description,
                 'director': director,
                 'actors': actors,
                 'genres':genres,
                 'year': year,
                 'episode': episode,
                 'timestamp': timestamp,
-                'pending': True
+                'pending': True,
             }
         )
         actors.sort()
@@ -63,6 +64,7 @@ def start_movie_upload(event, context):
             'Bucket': bucket_name,
             'Key': str(id),
             'Expires': 3600,
+            'ContentType': 'application/octet-stream'
         }, ExpiresIn=3600, HttpMethod="PUT")
 
         request_body['id'] = str(id)
@@ -83,7 +85,13 @@ def start_movie_upload(event, context):
         return {
             'statusCode': 201,
             'body': json.dumps(response_body, default=str),
-            'isBase64Encoded': False 
+            'isBase64Encoded': False,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin':'*',
+                'Access-Control-Allow-Methods': 'PUT,OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'
+            }
         }
     except Exception as e:
         print('##EXCEPTION')

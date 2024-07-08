@@ -37,7 +37,6 @@ def delete_one(event, context):
         print('##EXCEPTION')
         print(e)
         print('#BODY')
-        print(event['body'])
         return {
             'status': 'FAILED',
             'statusCode': 500,

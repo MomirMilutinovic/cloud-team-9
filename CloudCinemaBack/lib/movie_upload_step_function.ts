@@ -22,6 +22,12 @@ export class MovieUploadStepFunction extends Construct {
     public readonly isMovieUploaded: lambda.Function;
     public readonly cleanUpFailedUpload: lambda.Function;
     public readonly markMovieAsUploaded: lambda.Function;
+    public readonly deleteMovieFromS3: lambda.Function;
+    public readonly sendMovieUploadTaskResult: lambda.Function;
+    public readonly sendTranscodeFailTaskResult: lambda.Function;
+    public readonly transcodeMovie: lambda.Function;
+    public readonly task_token_table: dynamodb.Table;
+    public readonly transcodingQueue: sqs.Queue;
 
     constructor(scope: Construct, id: string, props: MovieUploadStepFunctionProps) {
         super(scope, id);
@@ -42,7 +48,7 @@ export class MovieUploadStepFunction extends Construct {
             retentionPeriod: cdk.Duration.minutes(30)
         });
         const transcodingQueue = new sqs.Queue(this, 'transcoding-queue', {
-            visibilityTimeout: cdk.Duration.minutes(5),
+            visibilityTimeout: cdk.Duration.minutes(6),
             retentionPeriod: cdk.Duration.minutes(30),
             deadLetterQueue: {
                 maxReceiveCount: 3,
@@ -106,9 +112,9 @@ export class MovieUploadStepFunction extends Construct {
                     ]
                 }
             }),
-            timeout: cdk.Duration.minutes(2),
+            timeout: cdk.Duration.minutes(5),
             layers: [ffmegLayer],
-            memorySize: 1024 + 512
+            memorySize: 3008
         });
 
 
@@ -218,5 +224,13 @@ export class MovieUploadStepFunction extends Construct {
         this.stateMachine.grantTaskResponse(sendTranscodeFailTaskResult);
         this.stateMachine.grantTaskResponse(transcodeMovie);
         task_token_table.grantReadWriteData(sendMovieUploadTaskResult)
+
+
+        this.deleteMovieFromS3 = deleteMovieFromS3;
+        this.sendMovieUploadTaskResult = sendMovieUploadTaskResult
+        this.sendTranscodeFailTaskResult = sendTranscodeFailTaskResult;
+        this.transcodeMovie = transcodeMovie;
+        this.task_token_table = task_token_table;
+        this.transcodingQueue = transcodingQueue;
     }
 }

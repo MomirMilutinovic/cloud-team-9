@@ -82,4 +82,9 @@ export class AuthService {
             this.router.navigate(['/home']);
         }
     }
+
+    async isLoggedIn() {
+        const session = (await fetchAuthSession());
+        return session.tokens != null;
+    }
 }

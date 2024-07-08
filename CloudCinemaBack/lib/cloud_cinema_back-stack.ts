@@ -17,6 +17,8 @@ import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { MovieFileEditStepFunction } from './movie_file_edit_step_function';
+import { start } from 'repl';
 
 export class CloudCinemaBackStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -171,7 +173,7 @@ export class CloudCinemaBackStack extends cdk.Stack {
     });
     bucket.addCorsRule({
       allowedOrigins: ['*'], 
-      allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.DELETE],
+      allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.DELETE, s3.HttpMethods.PUT],
       allowedHeaders: ['*']
     }); 
 
@@ -244,7 +246,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
-      writeCapacity:1
+      writeCapacity:1,
+      stream:dynamodb.StreamViewType.NEW_IMAGE
     });
 
     rating_info_table.addGlobalSecondaryIndex({
@@ -710,9 +713,48 @@ export class CloudCinemaBackStack extends cdk.Stack {
       batchSize: 100,
       retryAttempts: 1,
     }));
+    startGenerateFeed.addEventSource(new DynamoEventSource(rating_info_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
 
     const cfnMovieGenerateFeedStepFunction = movieGenerateFeedStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
     startGenerateFeed.addEnvironment('STATE_MACHINE_ARN', cfnMovieGenerateFeedStepFunction.attrArn);
     movieGenerateFeedStepFunction.stateMachine.grantStartExecution(startGenerateFeed);
+
+    const movieFileEditStepFunction = new MovieFileEditStepFunction(this, 'MovieFileEditStepFunction', {
+      cleanUpFailedUpload: movieUploadStepFunction.cleanUpFailedUpload,
+      deleteMovieFromS3: movieUploadStepFunction.deleteMovieFromS3,
+      movieSourceBucket: bucket,
+      sendMovieUploadTaskResult: movieUploadStepFunction.sendMovieUploadTaskResult,
+      sendTranscodeFailTaskResult: movieUploadStepFunction.sendTranscodeFailTaskResult,
+      transcodeMovie: movieUploadStepFunction.transcodeMovie,
+      task_token_table: movieUploadStepFunction.task_token_table,
+      transcodingQueue: movieUploadStepFunction.transcodingQueue,
+      isMovieUploaded: movieUploadStepFunction.isMovieUploaded,
+      outputBucket: ouptutBucket
+    });
+
+    const cfnMovieFileEditStepFunction = movieFileEditStepFunction.stateMachine.node.defaultChild as sfn.CfnStateMachine;
+    const startMovieFileEdit = new lambda.Function(this, 'StartMovieFileEditFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'start_movie_file_edit.start_movie_file_edit',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../functions')),
+      timeout: cdk.Duration.seconds(30)
+    });
+
+    startMovieFileEdit.addEnvironment('STATE_MACHINE_ARN', cfnMovieFileEditStepFunction.attrArn);
+    movieFileEditStepFunction.stateMachine.grantStartExecution(startMovieFileEdit);
+    startMovieFileEdit.addEnvironment('BUCKET_NAME', bucket.bucketName);
+    startMovieFileEdit.addEnvironment('OUTPUT_BUCKET_NAME', ouptutBucket.bucketName);
+    ouptutBucket.grantReadWrite(startMovieFileEdit);
+    bucket.grantReadWrite(startMovieFileEdit);
+
+    const startMovieFileEditIntegration = new apigateway.LambdaIntegration(startMovieFileEdit);
+    const movieFileBase = api.root.addResource('movie_file');
+    movieFileBase.addMethod('PUT', startMovieFileEditIntegration, {
+      authorizer: adminAuthorizer
+    });
   }
 }
