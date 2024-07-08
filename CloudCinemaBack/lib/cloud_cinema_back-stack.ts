@@ -246,7 +246,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       readCapacity:1,           
-      writeCapacity:1
+      writeCapacity:1,
+      stream:dynamodb.StreamViewType.NEW_IMAGE
     });
 
     rating_info_table.addGlobalSecondaryIndex({
@@ -708,6 +709,11 @@ export class CloudCinemaBackStack extends cdk.Stack {
       retryAttempts: 1,
     }));
     startGenerateFeed.addEventSource(new DynamoEventSource(subscription_table, {
+      startingPosition: lambda.StartingPosition.LATEST,
+      batchSize: 100,
+      retryAttempts: 1,
+    }));
+    startGenerateFeed.addEventSource(new DynamoEventSource(rating_info_table, {
       startingPosition: lambda.StartingPosition.LATEST,
       batchSize: 100,
       retryAttempts: 1,
