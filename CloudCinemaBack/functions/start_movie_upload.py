@@ -19,6 +19,7 @@ def start_movie_upload(event, context):
     try:
         request_body = json.loads(event['body'])
         name = request_body['name']
+        description = request_body['description']
         timestamp = int(time.time())
         director = request_body['director']
         actors = request_body['actors']
@@ -33,14 +34,14 @@ def start_movie_upload(event, context):
             Item={
                 'id': str(id),
                 'name': name,
-                'description':description,
+                'description': description,
                 'director': director,
                 'actors': actors,
                 'genres':genres,
                 'year': year,
                 'episode': episode,
                 'timestamp': timestamp,
-                'pending': True
+                'pending': True,
             }
         )
         actors.sort()

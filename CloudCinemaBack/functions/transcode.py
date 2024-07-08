@@ -15,7 +15,7 @@ output_bucket = os.environ['OUTPUT_BUCKET']
 
 def monitor(ffmpeg, duration, time_, time_left, process):
     per = round(time_ / duration * 100)
-    if per % 20 != 0:
+    if per % 25 != 0 and per != 0:
         return
 
     sys.stdout.write(
