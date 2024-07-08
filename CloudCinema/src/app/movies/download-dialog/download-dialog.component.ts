@@ -31,7 +31,7 @@ export class DownloadDialogComponent implements OnInit {
   }
 
   download() {
-    this.movieService.downloadMovie(this.data.id, this.qualityForm.value.quality,
+    this.movieService.download(this.data.id, this.qualityForm.value.quality,
       () => this.dialogRef.close()
     );
   }

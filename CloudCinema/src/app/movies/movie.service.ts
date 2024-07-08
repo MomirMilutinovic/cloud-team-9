@@ -142,14 +142,14 @@ export class MovieService {
     );
   }
 
-  downloadMovie(id: string, quality: string, callback?: (() => void)) {
+  download(id: string, quality: string, callback?: (() => void)) {
     const ffmpeg = new FFmpeg();
-    const playlistFileName = id + '_' + quality + '.m3u8';
+    const playlistFileName = `${id}_${quality}.m3u8`;
     ffmpeg.whenReady(async () => {
       await this.downloadSegments(id, quality, ffmpeg);
       await ffmpeg.exec(['-i', playlistFileName, '-c', 'copy', '-bsf:a', 'aac_adtstoasc', 'download.mp4'])
       const result: Uint8Array = ffmpeg.readFile('download.mp4');
-      this.downloadData(result, 'video/mp4')
+      this.downloadData(result, id, quality, 'video/mp4')
       if (callback) {
         callback();
       }
@@ -158,7 +158,7 @@ export class MovieService {
 
   private async downloadSegments(id: string, quality: string, ffmpeg: FFmpeg) {
       const source = environment.transcodedMovieBucketUrl + id + '_' + quality + '.m3u8';
-      const playlistFileName = id + '_' + quality + '.m3u8';
+      const playlistFileName = `${id}_${quality}.m3u8`;
       await ffmpeg.writeFile(playlistFileName, source);
       const playlistAsString = new TextDecoder().decode(ffmpeg.readFile(playlistFileName));
       const segmentFilenames = playlistAsString.split('\n').filter(line => !line.startsWith('#') && (line.trim() != ''));
@@ -168,11 +168,11 @@ export class MovieService {
       await Promise.all(segmentDownloads)
   }
 
-  private downloadData(file: Uint8Array, mimeType: string) {
+  private downloadData(file: Uint8Array, id: string, quality: string, mimeType: string) {
     // Taken from https://github.com/diffusion-studio/ffmpeg-js/blob/main/examples/src/main.ts
     const a = document.createElement('a');
     document.head.appendChild(a);
-    a.download = `rendered-file.${mimeType.split("/").at(1)}`
+    a.download = `${id}_${quality}.${mimeType.split("/").at(1)}`
     a.href = URL.createObjectURL(
       new Blob([file], { type: mimeType })
     )
