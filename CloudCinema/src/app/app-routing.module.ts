@@ -9,17 +9,19 @@ import { MovieInfoComponent } from './movies/movie-info/movie-info.component';
 import {MovieSubscriptionsComponent} from "./movies/movie-subscriptions/movie-subscriptions.component";
 import {ViewEpisodesComponent} from "./series/view-episodes/view-episodes.component";
 import { CreateMovieComponent } from './movies/create-movie/create-movie.component';
+import { adminGuard } from './auth/guard/admin.guard';
+import { authGuard } from './auth/guard/auth.guard';
 
 const routes: Routes = [
   {path: '', redirectTo: '/home', pathMatch: 'full'},
-  {path:"home/movies/movieEdit/:id/:timestamp", component: EditMovieComponent},
-  {path:"home/movies/episodesView/:seriesName", component: ViewEpisodesComponent},
-  {path:"home",component:HomeComponent},
+  {path:"home/movies/movieEdit/:id/:timestamp", component: EditMovieComponent, canActivate: [adminGuard]},
+  {path:"home/movies/episodesView/:seriesName", component: ViewEpisodesComponent, canActivate: [authGuard]},
+  {path:"home",component:HomeComponent, canActivate: [authGuard]},
   {path:'login', component: LoginPageComponent},
-  {path:'details/:id/:timestamp', component: MovieInfoComponent},
-  {path:'home/movies/subscription', component: MovieSubscriptionsComponent},
-  {path:'play/:id', component: PlayerComponent},
-  {path:'home/movies/new', component: CreateMovieComponent}
+  {path:'details/:id/:timestamp', component: MovieInfoComponent, canActivate: [authGuard]},
+  {path:'home/movies/subscription', component: MovieSubscriptionsComponent, canActivate: [authGuard]},
+  {path:'play/:id', component: PlayerComponent, canActivate: [authGuard]},
+  {path:'home/movies/new', component: CreateMovieComponent, canActivate: [adminGuard]}
 ]
 
 @NgModule({
