@@ -13,6 +13,8 @@ import {MatButtonModule} from "@angular/material/button";
 import {SeriesModule} from "../series/series.module";
 import {MaterialModule} from "../infrastructure/material/material.module";
 import { CreateMovieComponent } from './create-movie/create-movie.component';
+import { DownloadDialogComponent } from './download-dialog/download-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 
@@ -23,7 +25,8 @@ import { CreateMovieComponent } from './create-movie/create-movie.component';
     PlayerComponent,
     MovieInfoComponent,
     MovieSubscriptionsComponent,
-    CreateMovieComponent
+    CreateMovieComponent,
+    DownloadDialogComponent,
   ],
   exports: [
     MovieCardComponent

@@ -142,7 +142,7 @@ export class MovieService {
     );
   }
 
-  downloadMovie(id: string, quality: string) {
+  downloadMovie(id: string, quality: string, callback?: (() => void)) {
     const ffmpeg = new FFmpeg();
     const playlistFileName = id + '_' + quality + '.m3u8';
     ffmpeg.whenReady(async () => {
@@ -150,6 +150,9 @@ export class MovieService {
       await ffmpeg.exec(['-i', playlistFileName, '-c', 'copy', '-bsf:a', 'aac_adtstoasc', 'download.mp4'])
       const result: Uint8Array = ffmpeg.readFile('download.mp4');
       this.downloadData(result, 'video/mp4')
+      if (callback) {
+        callback();
+      }
     });
   }
 
@@ -174,6 +177,15 @@ export class MovieService {
       new Blob([file], { type: mimeType })
     )
     a.click();
+  }
+
+  getQualities(id: string): Observable<string[]> {
+    const url = environment.transcodedMovieBucketUrl + id + '.m3u8';
+    return this.httpClient.get(url, {responseType: 'text', headers: {'skip': 'true'}}).pipe(
+      map((playlist: string) => {
+        return playlist.split('\n').filter(line => !line.startsWith('#') && (line.trim() != '')).map(line => line.split('_')[1].split('.')[0])
+      })
+    );
   }
 
 }

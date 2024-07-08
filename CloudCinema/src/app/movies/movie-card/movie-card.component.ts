@@ -5,6 +5,8 @@ import {HttpResponse} from "@angular/common/http";
 import {Router} from "@angular/router";
 import { AuthService } from 'src/app/auth/auth.service';
 import {MatSnackBar} from "@angular/material/snack-bar";
+import { MatDialog } from '@angular/material/dialog';
+import { DownloadDialogComponent } from '../download-dialog/download-dialog.component';
 
 
 @Component({
@@ -19,7 +21,7 @@ export class MovieCardComponent implements OnInit {
   userEmail:string|null;
   editDisabled = true;
 
-  constructor(private snackBar:MatSnackBar,private movieService: MovieService, private authService: AuthService, private router: Router) {
+  constructor(private snackBar:MatSnackBar,private movieService: MovieService, private authService: AuthService, private router: Router, private matDialog: MatDialog) {
     this.editDisabled = true;
   }
 
@@ -46,7 +48,10 @@ export class MovieCardComponent implements OnInit {
 
 
     if (movie.id) {
-      this.movieService.downloadMovie(movie.id, '144p');
+      this.matDialog.open(DownloadDialogComponent, {
+        width: '400px',
+        data: {id: movie.id}
+      });
     }
     /*
     // @ts-ignore
