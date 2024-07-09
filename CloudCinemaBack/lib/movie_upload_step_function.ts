@@ -9,12 +9,14 @@ import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import path = require('path');
-import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { SnsEventSource, SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 
 export interface MovieUploadStepFunctionProps {
     movieSourceBucket: s3.Bucket,
     movieTable: Table,
-    movieOutputBucket: s3.Bucket
+    movieOutputBucket: s3.Bucket,
+    bucketTopic: Topic
 }
 
 export class MovieUploadStepFunction extends Construct {
@@ -219,7 +221,8 @@ export class MovieUploadStepFunction extends Construct {
         this.stateMachine = new sfn.StateMachine(this, 'MovieUploadStateMachine', {
             definitionBody: sfn.DefinitionBody.fromChainable(definition)
         });
-        movieSourceBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new LambdaDestination(sendMovieUploadTaskResult));
+        const bucketEventSource = new SnsEventSource(props.bucketTopic);
+        sendMovieUploadTaskResult.addEventSource(bucketEventSource);
         this.stateMachine.grantTaskResponse(sendMovieUploadTaskResult);
         this.stateMachine.grantTaskResponse(sendTranscodeFailTaskResult);
         this.stateMachine.grantTaskResponse(transcodeMovie);

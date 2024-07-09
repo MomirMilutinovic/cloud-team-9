@@ -4,6 +4,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
+import * as sns from 'aws-cdk-lib/aws-sns';
 import path = require('path');
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { MovieUploadStepFunction } from './movie_upload_step_function';
@@ -12,13 +13,10 @@ import { MovieGenerateFeedStepFunction } from './movie_feed_step_function';
 
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
-import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { DynamoEventSource, S3EventSource, SnsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { MovieFileEditStepFunction } from './movie_file_edit_step_function';
-import { start } from 'repl';
+import { LambdaDestination, SnsDestination } from 'aws-cdk-lib/aws-s3-notifications';
 
 export class CloudCinemaBackStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -175,7 +173,11 @@ export class CloudCinemaBackStack extends cdk.Stack {
       allowedOrigins: ['*'], 
       allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.DELETE, s3.HttpMethods.PUT],
       allowedHeaders: ['*']
-    }); 
+    });
+
+    const bucketTopic = new sns.Topic(this, 'BucketTopic', {
+      displayName: 'Source bucket object creation topic',
+    });
 
     const ouptutBucket = new s3.Bucket(this, 'CloudCinemaMoviesTranscodedBucket', {
       bucketName: 'cloud-cinema-movies-transcoded-bucket-us', 
@@ -327,7 +329,8 @@ export class CloudCinemaBackStack extends cdk.Stack {
     const movieUploadStepFunction = new MovieUploadStepFunction(this, 'MovieUploadStepFunction', {
       movieSourceBucket: bucket,
       movieTable: movie_info_table,
-      movieOutputBucket: ouptutBucket
+      movieOutputBucket: ouptutBucket,
+      bucketTopic: bucketTopic
     });
 
     const movieDeleteStepFunction = new MovieDeleteStepFunction(this, 'MovieDeleteStepFunction', {
@@ -756,5 +759,36 @@ export class CloudCinemaBackStack extends cdk.Stack {
     movieFileBase.addMethod('PUT', startMovieFileEditIntegration, {
       authorizer: adminAuthorizer
     });
+
+    const file_info_table = new dynamodb.Table(this, 'CloudCinemaFileInfoTable', {
+      tableName: 'cloud-cinema-file-info', 
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING},
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      readCapacity:1,           
+      writeCapacity:1,
+    });
+
+    const updateFileMetadata = new lambda.Function(this, 'UpdateFileMetadataFunction', {
+        runtime: lambda.Runtime.PYTHON_3_12, // python-ffmpeg-video-streaming does not work on python versions newer than 3.8
+        handler: 'update_file_metadata.update_file_metadata',
+        code: lambda.Code.fromAsset(path.join(__dirname, '../functions'),{
+            bundling: {
+                image: lambda.Runtime.PYTHON_3_12.bundlingImage,
+                command: [
+                    'bash', '-c', 'pip install --no-cache python-magic -t /asset-output && rsync -r . /asset-output'
+                ]
+            }
+        }),
+        timeout: cdk.Duration.minutes(1),
+        memorySize: 128
+    });
+
+    bucket.grantRead(updateFileMetadata);
+    file_info_table.grantReadWriteData(updateFileMetadata);
+    updateFileMetadata.addEnvironment('BUCKET_NAME', bucket.bucketName);
+    updateFileMetadata.addEnvironment('TABLE_NAME', file_info_table.tableName);
+    bucket.addEventNotification(s3.EventType.OBJECT_CREATED, new SnsDestination(bucketTopic));
+    const bucketEventSource = new SnsEventSource(bucketTopic);
+    updateFileMetadata.addEventSource(bucketEventSource);
   }
 }
