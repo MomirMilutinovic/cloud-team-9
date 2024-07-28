@@ -1,0 +1,41 @@
+<div>
+  <form [formGroup]="subscribeForm">
+    <div>
+      <label for="actors">Actors:</label>
+      <input type="text" id="actors" formControlName="actors">
+    </div>
+    <div>
+      <label for="director">Directors:</label>
+      <input type="text" id="director" formControlName="directors">
+    </div>
+    <div>
+      <label for="genres">Genres:</label>
+      <input type="text" id="genres" formControlName="genres">
+    </div>
+    <button (click)="subscribeSNS()">Subscribe</button>
+<!--    <button (click)="getAll()">Get All</button>-->
+<!--    <button (click)="delete()">Delete</button>-->
+  </form>
+</div>
+<div id="subscriptionsTableDiv">
+  <table id="subTable" mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let element">{{element?.type}}</td>
+    </ng-container>
+    <ng-container matColumnDef="subscription">
+      <th mat-header-cell *matHeaderCellDef>Subscription</th>
+      <td mat-cell *matCellDef="let element">{{element?.subscription}}</td>
+    </ng-container>
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef>Delete Subscription</th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-raised-button color="warn" (click)="deleteSub(element)">Delete</button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+  </table>
+
+</div>

@@ -1,0 +1,47 @@
+mat-toolbar {
+  background-color: rgba(206, 201, 201, 0.38);
+  align-items: center;
+  height: 80px;
+  position: absolute;
+}
+
+.logo {
+  width: 250px;
+  height: 60px;
+}
+
+.leftSide {
+  width: 20%;
+}
+
+.rightSide {
+  width: 80%;
+  display: flex;
+  justify-content: right;
+  padding-top: 10px;
+}
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  padding-top: 3px;
+  width: 150px;
+  margin-right: 0px;
+}
+
+.example-full-width {
+  padding-bottom: 10px;
+}
+
+.search-container mat-form-field input {
+  height: 50px;
+}
+
+button{
+  background-color: rgba(206, 201, 201, 0);
+  cursor: pointer;
+  border: none;
+}
+
+

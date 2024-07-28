@@ -1,0 +1,46 @@
+.movie-container-wrapper {
+  position: relative;
+}
+
+.movie-container {
+  display: flex;
+  overflow-x: scroll;
+  padding: 20px;
+  padding-top: 200px;
+  gap: 20px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+.movie-container::-webkit-scrollbar{ /* WebKit */
+  display: none;
+}
+
+
+
+.arrow {
+  position: absolute;
+  top: 65%;
+  transform: translateY(-50%);
+  padding: 5px;
+  padding-top: 7px;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  cursor: pointer;
+  font-size: 24px;
+  user-select: none;
+  display: none;
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
+}
+
+.movie-container-wrapper:hover .arrow{
+  display: block;
+}

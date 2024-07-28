@@ -1,0 +1,12 @@
+<div class="series-card">
+  <div id="card-info-div">
+    <h2>{{ series.name }}</h2>
+    <p><strong>Genres:</strong> {{ series.genres }}</p>
+    <p><strong>Year:</strong> {{ series.year }}</p>
+    <p><strong>Actors:</strong> {{ series.actors }}</p>
+    <p><strong>Directors:</strong> {{ series.director}}</p>
+  </div>
+  <div class="buttons">
+    <button class="btn play" [routerLink]="['movies/episodesView',series.name]"><mat-icon>play_circle_outline</mat-icon></button>
+  </div>
+</div>

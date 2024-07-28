@@ -1,0 +1,63 @@
+<form [formGroup]="searchForm">
+<mat-toolbar>
+  <div class="travelBee">
+    <img class="logo" src="../../../assets/images/cloud_logo.png" alt="Illustration Image">
+  </div>
+  <div class="leftSide">
+    <button [routerLink]="['']" mat-icon-button class="example-icon favorite-icon">
+      <mat-icon>home</mat-icon>
+    </button>
+  </div>
+  <div class="rightSide">
+    <button  mat-icon-button class="example-icon favorite-icon" (click)="signOut()">
+      <mat-icon>logout</mat-icon>
+    </button>
+    <button  mat-icon-button class="example-icon favorite-icon" [routerLink]="['home/movies/subscription']">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    <button  mat-icon-button class="example-icon favorite-icon" [routerLink]="['home/movies/new']" *ngIf="isAdmin">
+      <mat-icon>note_add</mat-icon>
+    </button>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="movieName" matInput placeholder="Search movies">
+        </div>
+      </mat-form-field>
+    </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="description" matInput placeholder="Description">
+        </div>
+      </mat-form-field>
+    </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="actors" matInput placeholder="Search actors">
+        </div>
+      </mat-form-field>
+    </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="director" matInput placeholder="Search director">
+        </div>
+      </mat-form-field>
+    </div>
+    <div class="search-container">
+      <mat-form-field appearance="outline">
+        <div>
+          <input formControlName="genres" matInput placeholder="Search genres">
+        </div>
+      </mat-form-field>
+    </div>
+    <button (click)="search()"><mat-icon matPrefix>search</mat-icon></button>
+
+  </div>
+
+</mat-toolbar>
+
+</form>
